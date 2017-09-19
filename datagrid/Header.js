@@ -48,6 +48,8 @@ export class ColumnRow {
             position: "relative"
         });
 
+        this.scrollWidth = 50;
+
         this._startResize = this.startResize.bind(this);
         this.view.on("mousedown", this._startResize);
     }
@@ -60,7 +62,7 @@ export class ColumnRow {
         let pos = 0;
 
         this.view.css({
-            width: this.model.getWidth() + 50 // any extra that might be needed for the sidebar.
+            width: this.model.getWidth() + this.scrollWidth // any extra that might be needed for the sidebar.
         });
 
         let frag = document.createDocumentFragment();
@@ -128,7 +130,7 @@ export class ColumnRow {
 
         let onMouseMove = (event) => {
             this._modColumnWidths(originalWidths, column, event.clientX - startX);
-            this.refresh();
+            this.refresh(false);
         };
 
         let onMouseUp = (event) => {
@@ -136,6 +138,7 @@ export class ColumnRow {
             $doc.off("mouseup", onMouseUp);
 
             this._modColumnWidths(originalWidths, column, event.clientX - startX);
+            this.refresh(true);
             this.grid.render();
         };
 
@@ -161,9 +164,13 @@ export class ColumnRow {
     /**
      * Refresh the size and position of every visible column.
      */
-    refresh() {
+    refresh(updateViewWidth=true) {
         let $columns = this.view.find(".grid-column"),
             pos = null;
+
+        if(updateViewWidth) {
+            this.view.css("width", this.model.getWidth() + this.scrollWidth);
+        }
 
         $columns.each((index, element) => {
             let $column = $(element),

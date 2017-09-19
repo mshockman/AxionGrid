@@ -107,7 +107,7 @@
             }
         ];
 
-        var model = new grid.DataModel({data: data, columns: columns});
+        var model = new grid.DataModel({data: data, columns: columns, maxWidth: 400, minWidth: 30});
         var header = new grid.GridHeader();
 
         header.appendTo("#container");

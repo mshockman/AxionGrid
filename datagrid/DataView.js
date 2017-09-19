@@ -4,9 +4,11 @@ import {MetaData} from "./MetaData";
 import {clamp, coordinateString} from "./util";
 
 export class DataModel {
-    constructor({data, columns, rowHeight=25, defaultColumnWidth=100}) {
+    constructor({data, columns, rowHeight=25, defaultColumnWidth=100, minWidth=null, maxWidth=null}) {
         this.rowHeight = rowHeight;
         this.defaultColumnWidth = defaultColumnWidth;
+        this.minWidth = minWidth;
+        this.maxWidth = maxWidth;
         this.data = null;
 
         this.rowData = new MetaData();
@@ -340,6 +342,10 @@ class Column {
     getMinWidth() {
         let min = this.getMetaData("minWidth");
 
+        if(min == null) {
+            min = this.model.minWidth;
+        }
+
         if(typeof min !== "number") {
             return 0;
         } else {
@@ -349,6 +355,11 @@ class Column {
 
     getMaxWidth() {
         let max = this.getMetaData("maxWidth");
+
+        if(max == null) {
+            max = this.model.maxWidth;
+        }
+
         return typeof max !== "number" ? Infinity : max;
     }
 

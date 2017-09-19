@@ -9303,12 +9303,18 @@ var DataModel = exports.DataModel = function () {
             _ref$rowHeight = _ref.rowHeight,
             rowHeight = _ref$rowHeight === undefined ? 25 : _ref$rowHeight,
             _ref$defaultColumnWid = _ref.defaultColumnWidth,
-            defaultColumnWidth = _ref$defaultColumnWid === undefined ? 100 : _ref$defaultColumnWid;
+            defaultColumnWidth = _ref$defaultColumnWid === undefined ? 100 : _ref$defaultColumnWid,
+            _ref$minWidth = _ref.minWidth,
+            minWidth = _ref$minWidth === undefined ? null : _ref$minWidth,
+            _ref$maxWidth = _ref.maxWidth,
+            maxWidth = _ref$maxWidth === undefined ? null : _ref$maxWidth;
 
         _classCallCheck(this, DataModel);
 
         this.rowHeight = rowHeight;
         this.defaultColumnWidth = defaultColumnWidth;
+        this.minWidth = minWidth;
+        this.maxWidth = maxWidth;
         this.data = null;
 
         this.rowData = new _MetaData.MetaData();
@@ -9712,6 +9718,10 @@ var Column = function () {
         value: function getMinWidth() {
             var min = this.getMetaData("minWidth");
 
+            if (min == null) {
+                min = this.model.minWidth;
+            }
+
             if (typeof min !== "number") {
                 return 0;
             } else {
@@ -9722,6 +9732,11 @@ var Column = function () {
         key: "getMaxWidth",
         value: function getMaxWidth() {
             var max = this.getMetaData("maxWidth");
+
+            if (max == null) {
+                max = this.model.maxWidth;
+            }
+
             return typeof max !== "number" ? Infinity : max;
         }
     }, {
@@ -10288,6 +10303,8 @@ var ColumnRow = exports.ColumnRow = function () {
             position: "relative"
         });
 
+        this.scrollWidth = 50;
+
         this._startResize = this.startResize.bind(this);
         this.view.on("mousedown", this._startResize);
     }
@@ -10298,7 +10315,7 @@ var ColumnRow = exports.ColumnRow = function () {
             var pos = 0;
 
             this.view.css({
-                width: this.model.getWidth() + 50 // any extra that might be needed for the sidebar.
+                width: this.model.getWidth() + this.scrollWidth // any extra that might be needed for the sidebar.
             });
 
             var frag = document.createDocumentFragment();
@@ -10371,7 +10388,7 @@ var ColumnRow = exports.ColumnRow = function () {
 
             var onMouseMove = function onMouseMove(event) {
                 _this2._modColumnWidths(originalWidths, column, event.clientX - startX);
-                _this2.refresh();
+                _this2.refresh(false);
             };
 
             var onMouseUp = function onMouseUp(event) {
@@ -10379,6 +10396,7 @@ var ColumnRow = exports.ColumnRow = function () {
                 $doc.off("mouseup", onMouseUp);
 
                 _this2._modColumnWidths(originalWidths, column, event.clientX - startX);
+                _this2.refresh(true);
                 _this2.grid.render();
             };
 
@@ -10411,8 +10429,14 @@ var ColumnRow = exports.ColumnRow = function () {
         value: function refresh() {
             var _this3 = this;
 
+            var updateViewWidth = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
             var $columns = this.view.find(".grid-column"),
                 pos = null;
+
+            if (updateViewWidth) {
+                this.view.css("width", this.model.getWidth() + this.scrollWidth);
+            }
 
             $columns.each(function (index, element) {
                 var $column = $(element),
