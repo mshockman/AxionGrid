@@ -65,6 +65,9 @@ export class ViewPort {
                     return;
                 }
 
+                this._incrementX = incrementX;
+                this._incrementY = incrementY;
+
                 let width = this.viewport.innerWidth(),
                     height = this.viewport.innerHeight();
 
