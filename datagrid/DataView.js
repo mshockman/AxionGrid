@@ -258,6 +258,10 @@ class Cell {
             handle(this, event);
         }
     }
+
+    getLeft() {
+        return this.getColumn().getLeft();
+    }
 }
 
 
@@ -309,6 +313,17 @@ class Column {
 
     getClasses() {
         return this.getMetaData("classes") || "";
+    }
+
+    getLeft() {
+        let pos = 0;
+
+        for(let i = 0; i < this.columnNumber; i++) {
+            let column = this.model.getColumn(i);
+            pos += column.getWidth();
+        }
+
+        return pos;
     }
 }
 

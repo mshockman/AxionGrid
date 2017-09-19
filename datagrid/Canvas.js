@@ -69,6 +69,8 @@ export class $GridDivCanvas {
             $row.attr("data-row-number", row.rowNumber);
             rowPos += row.getHeight();
 
+            cellPos = row.getCell(columnRange.start).getLeft();
+
             for(let x = columnRange.start; x < columnRange.stop; x++) {
                 let cell = row.getCell(x),
                     cellWidth = cell.getWidth(),

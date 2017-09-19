@@ -18,8 +18,14 @@ export class CheckboxColumn {
 
         this.onChange = function(cell, event) {
             let val = $(event.target).is(":checked");
-            console.log("changed", val);
             cell.setMetaData("checked", val);
         };
+
+        this.label = function(column) {
+            let inputName = column.getMetaData("inputName"),
+                input = $("<input type='checkbox' name='"+inputName+"'>");
+
+            return input;
+        }
     }
 }

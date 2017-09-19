@@ -54,7 +54,7 @@ export class ColumnRow {
         let pos = 0;
 
         this.view.css({
-            width: this.model.getWidth()
+            width: this.model.getWidth() + 50 // any extra that might be needed for the sidebar.
         });
 
         for(let i = 0, l = this.model.getColumnLength(); i < l; i++) {

@@ -75,7 +75,13 @@ export function randomChoice(array) {
     return array[c];
 }
 
-
+/**
+ *
+ * @param value
+ * @param min
+ * @param max
+ * @returns {*}
+ */
 export function clamp(value, min=null, max=null) {
     if(min != null) {
         value = Math.max(min, value);
