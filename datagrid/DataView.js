@@ -374,6 +374,10 @@ class Column {
     prevColumn() {
         return this.columnNumber - 1 >= 0 ? new Column(this.model, this.columnNumber-1) : null;
     }
+
+    getDefinition() {
+        return this.model.columnData.get(this.columnNumber);
+    }
 }
 
 

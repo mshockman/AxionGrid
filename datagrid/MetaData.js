@@ -27,7 +27,7 @@ export class MetaData {
 
     get(index, key) {
         if(this.data[index]) {
-            return this.data[index][key];
+            return arguments.length > 1 ? this.data[index][key] : this.data[index];
         }
     }
 

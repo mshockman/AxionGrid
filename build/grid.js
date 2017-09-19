@@ -3857,7 +3857,7 @@ var MetaData = exports.MetaData = function () {
         key: "get",
         value: function get(index, key) {
             if (this.data[index]) {
-                return this.data[index][key];
+                return arguments.length > 1 ? this.data[index][key] : this.data[index];
             }
         }
     }, {
@@ -9754,6 +9754,11 @@ var Column = function () {
         value: function prevColumn() {
             return this.columnNumber - 1 >= 0 ? new Column(this.model, this.columnNumber - 1) : null;
         }
+    }, {
+        key: "getDefinition",
+        value: function getDefinition() {
+            return this.model.columnData.get(this.columnNumber);
+        }
     }]);
 
     return Column;
@@ -10253,9 +10258,7 @@ var GridHeader = exports.GridHeader = function () {
         this.view = $("<div class='grid-header'>");
         this.viewport = $("<div class='grid-header-viewport'>");
         this.viewport.css({
-            "overflow-x": "hidden",
-            position: "relative",
-            height: 25
+            position: "relative"
         });
         this.view.append(this.viewport);
     }
@@ -10296,24 +10299,48 @@ var GridHeader = exports.GridHeader = function () {
 
 var ColumnRow = exports.ColumnRow = function () {
     function ColumnRow(grid) {
+        var sortable = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+        var resizeable = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+
         _classCallCheck(this, ColumnRow);
 
         this.grid = grid;
+        this.sortable = sortable;
+
         this.view = $("<div class='grid-column-row'>").css({
-            position: "relative"
+            position: "relative",
+            "white-space": "nowrap"
         });
 
         this.scrollWidth = 50;
 
-        this._startResize = this.startResize.bind(this);
-        this.view.on("mousedown", this._startResize);
+        if (resizeable) {
+            this._startResize = this.startResize.bind(this);
+            this.view.on("mousedown", this._startResize);
+        }
+
+        if (this.sortable) {
+            this.initSorting();
+        }
     }
 
     _createClass(ColumnRow, [{
+        key: "initSorting",
+        value: function initSorting() {
+            var _this2 = this;
+
+            this.view.sortable({
+                axis: "x",
+                cancel: "input,textarea,button,select,option,.ui-resize-handle",
+
+                update: function update(event, ui) {
+                    _this2.applySort();
+                }
+            });
+        }
+    }, {
         key: "render",
         value: function render() {
-            var pos = 0;
-
             this.view.css({
                 width: this.model.getWidth() + this.scrollWidth // any extra that might be needed for the sidebar.
             });
@@ -10326,18 +10353,20 @@ var ColumnRow = exports.ColumnRow = function () {
                     name = column.getLabel(),
                     width = column.getWidth();
 
+                if (this.sortable && column.getMetaData("sortable")) {
+                    $column.addClass("ui-sortable");
+                }
+
                 $column.addClass(column.getClasses());
                 $column.attr(column.getAttributes());
                 $column.css(column.getStyle());
                 $column.data("columnNumber", column.columnNumber);
 
                 $column.css({
-                    position: "absolute",
-                    width: width,
-                    left: pos
+                    position: "relative",
+                    display: "inline-block",
+                    width: width
                 });
-
-                pos += width;
 
                 $column.append(name);
 
@@ -10371,7 +10400,7 @@ var ColumnRow = exports.ColumnRow = function () {
     }, {
         key: "startResize",
         value: function startResize(event) {
-            var _this2 = this;
+            var _this3 = this;
 
             var $eventTarget = $(event.target),
                 handle = $eventTarget.closest(".ui-resize-handle", this.view),
@@ -10387,17 +10416,17 @@ var ColumnRow = exports.ColumnRow = function () {
                 column = this.model.getColumn($column.data("columnNumber"));
 
             var onMouseMove = function onMouseMove(event) {
-                _this2._modColumnWidths(originalWidths, column, event.clientX - startX);
-                _this2.refresh(false);
+                _this3._modColumnWidths(originalWidths, column, event.clientX - startX);
+                _this3.refresh(false);
             };
 
             var onMouseUp = function onMouseUp(event) {
                 $doc.off("mousemove", onMouseMove);
                 $doc.off("mouseup", onMouseUp);
 
-                _this2._modColumnWidths(originalWidths, column, event.clientX - startX);
-                _this2.refresh(true);
-                _this2.grid.render();
+                _this3._modColumnWidths(originalWidths, column, event.clientX - startX);
+                _this3.refresh(true);
+                _this3.grid.render();
             };
 
             $doc.on("mousemove", onMouseMove);
@@ -10427,12 +10456,11 @@ var ColumnRow = exports.ColumnRow = function () {
     }, {
         key: "refresh",
         value: function refresh() {
-            var _this3 = this;
+            var _this4 = this;
 
             var updateViewWidth = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 
-            var $columns = this.view.find(".grid-column"),
-                pos = null;
+            var $columns = this.view.find(".grid-column");
 
             if (updateViewWidth) {
                 this.view.css("width", this.model.getWidth() + this.scrollWidth);
@@ -10440,20 +10468,35 @@ var ColumnRow = exports.ColumnRow = function () {
 
             $columns.each(function (index, element) {
                 var $column = $(element),
-                    column = _this3.model.getColumn($column.data("columnNumber")),
+                    column = _this4.model.getColumn($column.data("columnNumber")),
                     width = column.getWidth();
 
-                if (pos === null) {
-                    pos = column.getLeft();
-                }
-
                 $column.css({
-                    width: width,
-                    left: pos
+                    width: width
                 });
-
-                pos += width;
             });
+        }
+    }, {
+        key: "applySort",
+        value: function applySort() {
+            var _this5 = this;
+
+            var $columns = this.view.find(".grid-column"),
+                definitions = [],
+                i = 0;
+
+            $columns.each(function (index, element) {
+                var $column = $(element),
+                    column = _this5.model.getColumn($column.data("columnNumber"));
+
+                $column.data("columnNumber", i++);
+
+                definitions.push(column.getDefinition());
+            });
+
+            this.model.setColumns(definitions);
+            this.grid.render();
+            // this.render();
         }
     }, {
         key: "model",

@@ -8,9 +8,7 @@ export class GridHeader {
         this.view = $("<div class='grid-header'>");
         this.viewport = $("<div class='grid-header-viewport'>");
         this.viewport.css({
-            "overflow-x": "hidden",
-            position: "relative",
-            height: 25
+            position: "relative"
         });
         this.view.append(this.viewport);
     }
@@ -42,16 +40,36 @@ export class GridHeader {
 
 
 export class ColumnRow {
-    constructor(grid) {
+    constructor(grid, sortable=true, resizeable=true) {
         this.grid = grid;
+        this.sortable = sortable;
+
         this.view = $("<div class='grid-column-row'>").css({
-            position: "relative"
+            position: "relative",
+            "white-space": "nowrap"
         });
 
         this.scrollWidth = 50;
 
-        this._startResize = this.startResize.bind(this);
-        this.view.on("mousedown", this._startResize);
+        if(resizeable) {
+            this._startResize = this.startResize.bind(this);
+            this.view.on("mousedown", this._startResize);
+        }
+
+        if(this.sortable) {
+            this.initSorting();
+        }
+    }
+
+    initSorting() {
+        this.view.sortable({
+            axis: "x",
+            cancel: "input,textarea,button,select,option,.ui-resize-handle",
+
+            update: (event, ui) => {
+                this.applySort();
+            }
+        });
     }
 
     get model() {
@@ -59,8 +77,6 @@ export class ColumnRow {
     }
 
     render() {
-        let pos = 0;
-
         this.view.css({
             width: this.model.getWidth() + this.scrollWidth // any extra that might be needed for the sidebar.
         });
@@ -73,18 +89,20 @@ export class ColumnRow {
                 name = column.getLabel(),
                 width = column.getWidth();
 
+            if(this.sortable && column.getMetaData("sortable")) {
+                $column.addClass("ui-sortable");
+            }
+
             $column.addClass(column.getClasses());
             $column.attr(column.getAttributes());
             $column.css(column.getStyle());
             $column.data("columnNumber", column.columnNumber);
 
             $column.css({
-                position: "absolute",
-                width: width,
-                left: pos
+                position: "relative",
+                display: "inline-block",
+                width: width
             });
-
-            pos += width;
 
             $column.append(name);
 
@@ -165,8 +183,7 @@ export class ColumnRow {
      * Refresh the size and position of every visible column.
      */
     refresh(updateViewWidth=true) {
-        let $columns = this.view.find(".grid-column"),
-            pos = null;
+        let $columns = this.view.find(".grid-column");
 
         if(updateViewWidth) {
             this.view.css("width", this.model.getWidth() + this.scrollWidth);
@@ -177,16 +194,28 @@ export class ColumnRow {
                 column = this.model.getColumn($column.data("columnNumber")),
                 width = column.getWidth();
 
-            if(pos === null) {
-                pos = column.getLeft();
-            }
-
             $column.css({
-                width: width,
-                left: pos
+                width: width
             });
-
-            pos += width;
         });
+    }
+
+    applySort() {
+        let $columns = this.view.find(".grid-column"),
+            definitions = [],
+            i = 0;
+
+        $columns.each((index, element) => {
+            let $column = $(element),
+                column = this.model.getColumn($column.data("columnNumber"));
+
+            $column.data("columnNumber", i++);
+
+            definitions.push(column.getDefinition());
+        });
+
+        this.model.setColumns(definitions);
+        this.grid.render();
+        // this.render();
     }
 }
