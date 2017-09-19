@@ -32,6 +32,21 @@
         .grid-column {
             border: 1px solid #ccc;
         }
+
+        .ui-resize-handle {
+            position: absolute;
+            right: -5px;
+            width: 10px;
+            top: 0;
+            bottom: 0;
+            cursor: col-resize;
+            background-color: rgba(0, 0, 255, 0.1);
+            z-index: 2;
+        }
+
+        .grid-column-row {
+            user-select: none;
+        }
     </style>
 </head>
 <body>
@@ -56,43 +71,55 @@
         }
 
         var columns = [
-            new grid.CheckboxColumn("selected"),
+            new grid.CheckboxColumn("selected", {
+                resizeable: false,
+                width: 30
+            }),
             {
                 id: "id",
                 width: 100,
-                label: "ID"
+                label: "ID",
+                resizeable: true
             },
             {
                 id: "name",
                 width: 200,
-                label: "Name"
+                label: "Name",
+                resizeable: true
             },
             {
                 id: "progress",
                 width: 200,
-                label: "Progress"
+                label: "Progress",
+                resizeable: true
             },
             {
                 id: "color",
                 width: 200,
-                label: "Color"
+                label: "Color",
+                resizeable: true
             },
             {
                 id: "price",
                 width: 100,
-                label: "Price"
+                label: "Price",
+                resizeable: true
             }
         ];
 
         var model = new grid.DataModel({data: data, columns: columns});
-        var header = new grid.GridHeader(),
-            columnRow = new grid.ColumnRow(model);
+        var header = new grid.GridHeader();
+
         header.appendTo("#container");
-        header.append(columnRow);
-        columnRow.render();
 
         var canvas = new grid.$GridDivCanvas("#container");
         var viewport = new grid.ViewPort("#container", canvas);
+
+        var g = new grid.BaseGrid(model, viewport, canvas);
+
+        var columnRow = new grid.ColumnRow(g);
+        header.append(columnRow);
+        columnRow.render();
 
         canvas.setDataModel(model);
         // canvas.setViewPort(0, 3000, 1000, 1000);

@@ -8,12 +8,15 @@ import {CheckboxColumn} from "./Columns";
 import {GridHeader, ColumnRow} from "./Header";
 
 
-class StandardGrid {
-    constructor(container, model) {
-        this.viewport = null;
-        this.model = null;
-        this.canvas = null;
-        this.container = null;
+class BaseGrid {
+    constructor(model, viewport, canvas) {
+        this.viewport = viewport;
+        this.model = model;
+        this.canvas = canvas;
+    }
+
+    render() {
+        this.canvas.render();
     }
 }
 
@@ -26,7 +29,7 @@ export {
     $GridDivCanvas,
     ViewPort,
     CheckboxColumn,
-    StandardGrid,
+    BaseGrid,
     GridHeader,
     ColumnRow
 };

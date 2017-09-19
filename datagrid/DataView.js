@@ -291,6 +291,17 @@ class Column {
         return width;
     }
 
+    setWidth(width) {
+        width = clamp(width, this.getMinWidth(), this.getMaxWidth());
+        this.setMetaData("width", width);
+    }
+
+    addWidth(amount) {
+        let expected = this.getWidth() + amount;
+        this.setWidth(expected);
+        return expected - this.getWidth();
+    }
+
     setMetaData(key, value) {
         this.model.columnData.set(this.columnNumber, key, value);
     }
@@ -324,6 +335,33 @@ class Column {
         }
 
         return pos;
+    }
+
+    getMinWidth() {
+        let min = this.getMetaData("minWidth");
+
+        if(typeof min !== "number") {
+            return 0;
+        } else {
+            return min;
+        }
+    }
+
+    getMaxWidth() {
+        let max = this.getMetaData("maxWidth");
+        return typeof max !== "number" ? Infinity : max;
+    }
+
+    isResizeable() {
+        return this.getMetaData("resizeable") || false;
+    }
+
+    nextColumn() {
+        return this.model.getColumnLength() > this.columnNumber + 1 ? new Column(this.model, this.columnNumber+1) : null;
+    }
+
+    prevColumn() {
+        return this.columnNumber - 1 >= 0 ? new Column(this.model, this.columnNumber-1) : null;
     }
 }
 

@@ -9220,7 +9220,9 @@ module.exports = function (regExp, replace) {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.ColumnRow = exports.GridHeader = exports.StandardGrid = exports.CheckboxColumn = exports.ViewPort = exports.$GridDivCanvas = exports.MetaData = exports.util = exports.Dimension = exports.DataModel = undefined;
+exports.ColumnRow = exports.GridHeader = exports.BaseGrid = exports.CheckboxColumn = exports.ViewPort = exports.$GridDivCanvas = exports.MetaData = exports.util = exports.Dimension = exports.DataModel = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _DataView = __webpack_require__(330);
 
@@ -9244,14 +9246,24 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var StandardGrid = function StandardGrid(container, model) {
-    _classCallCheck(this, StandardGrid);
+var BaseGrid = function () {
+    function BaseGrid(model, viewport, canvas) {
+        _classCallCheck(this, BaseGrid);
 
-    this.viewport = null;
-    this.model = null;
-    this.canvas = null;
-    this.container = null;
-};
+        this.viewport = viewport;
+        this.model = model;
+        this.canvas = canvas;
+    }
+
+    _createClass(BaseGrid, [{
+        key: "render",
+        value: function render() {
+            this.canvas.render();
+        }
+    }]);
+
+    return BaseGrid;
+}();
 
 exports.DataModel = _DataView.DataModel;
 exports.Dimension = _Dimension.Dimension;
@@ -9260,7 +9272,7 @@ exports.MetaData = _MetaData.MetaData;
 exports.$GridDivCanvas = _Canvas.$GridDivCanvas;
 exports.ViewPort = _ViewPort.ViewPort;
 exports.CheckboxColumn = _Columns.CheckboxColumn;
-exports.StandardGrid = StandardGrid;
+exports.BaseGrid = BaseGrid;
 exports.GridHeader = _Header.GridHeader;
 exports.ColumnRow = _Header.ColumnRow;
 
@@ -9641,6 +9653,19 @@ var Column = function () {
             return width;
         }
     }, {
+        key: "setWidth",
+        value: function setWidth(width) {
+            width = (0, _util.clamp)(width, this.getMinWidth(), this.getMaxWidth());
+            this.setMetaData("width", width);
+        }
+    }, {
+        key: "addWidth",
+        value: function addWidth(amount) {
+            var expected = this.getWidth() + amount;
+            this.setWidth(expected);
+            return expected - this.getWidth();
+        }
+    }, {
         key: "setMetaData",
         value: function setMetaData(key, value) {
             this.model.columnData.set(this.columnNumber, key, value);
@@ -9681,6 +9706,38 @@ var Column = function () {
             }
 
             return pos;
+        }
+    }, {
+        key: "getMinWidth",
+        value: function getMinWidth() {
+            var min = this.getMetaData("minWidth");
+
+            if (typeof min !== "number") {
+                return 0;
+            } else {
+                return min;
+            }
+        }
+    }, {
+        key: "getMaxWidth",
+        value: function getMaxWidth() {
+            var max = this.getMetaData("maxWidth");
+            return typeof max !== "number" ? Infinity : max;
+        }
+    }, {
+        key: "isResizeable",
+        value: function isResizeable() {
+            return this.getMetaData("resizeable") || false;
+        }
+    }, {
+        key: "nextColumn",
+        value: function nextColumn() {
+            return this.model.getColumnLength() > this.columnNumber + 1 ? new Column(this.model, this.columnNumber + 1) : null;
+        }
+    }, {
+        key: "prevColumn",
+        value: function prevColumn() {
+            return this.columnNumber - 1 >= 0 ? new Column(this.model, this.columnNumber - 1) : null;
         }
     }]);
 
@@ -10122,10 +10179,14 @@ Object.defineProperty(exports, "__esModule", {
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var CheckboxColumn = exports.CheckboxColumn = function CheckboxColumn(name) {
+var CheckboxColumn = exports.CheckboxColumn = function CheckboxColumn(name, options) {
     _classCallCheck(this, CheckboxColumn);
 
     this.inputName = name;
+
+    if (options) {
+        Object.assign(this, options);
+    }
 
     this.cellFormatter = function (cell) {
         var checked = cell.getMetaData("checked") || false,
@@ -10162,8 +10223,11 @@ var CheckboxColumn = exports.CheckboxColumn = function CheckboxColumn(name) {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.ColumnRow = exports.GridHeader = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _util = __webpack_require__(89);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -10216,19 +10280,19 @@ var GridHeader = exports.GridHeader = function () {
 }();
 
 var ColumnRow = exports.ColumnRow = function () {
-    function ColumnRow(model) {
+    function ColumnRow(grid) {
         _classCallCheck(this, ColumnRow);
 
-        this.model = model;
+        this.grid = grid;
         this.view = $("<div class='grid-column-row'>").css({
             position: "relative"
         });
+
+        this._startResize = this.startResize.bind(this);
+        this.view.on("mousedown", this._startResize);
     }
 
     _createClass(ColumnRow, [{
-        key: "setViewport",
-        value: function setViewport(viewport) {}
-    }, {
         key: "render",
         value: function render() {
             var pos = 0;
@@ -10236,6 +10300,8 @@ var ColumnRow = exports.ColumnRow = function () {
             this.view.css({
                 width: this.model.getWidth() + 50 // any extra that might be needed for the sidebar.
             });
+
+            var frag = document.createDocumentFragment();
 
             for (var i = 0, l = this.model.getColumnLength(); i < l; i++) {
                 var $column = $("<div class='grid-column'>"),
@@ -10246,6 +10312,7 @@ var ColumnRow = exports.ColumnRow = function () {
                 $column.addClass(column.getClasses());
                 $column.attr(column.getAttributes());
                 $column.css(column.getStyle());
+                $column.data("columnNumber", column.columnNumber);
 
                 $column.css({
                     position: "absolute",
@@ -10256,13 +10323,178 @@ var ColumnRow = exports.ColumnRow = function () {
                 pos += width;
 
                 $column.append(name);
-                this.view.append($column);
+
+                if (column.isResizeable()) {
+                    var resizer = $("<div class='ui-resize-handle'>");
+                    $column.append(resizer);
+                }
+
+                $column.appendTo(frag);
             }
+
+            this.view.empty();
+            this.view.append(frag);
         }
     }, {
         key: "appendTo",
         value: function appendTo(element) {
             this.view.appendTo(element);
+        }
+    }, {
+        key: "getCurrentWidths",
+        value: function getCurrentWidths() {
+            var r = [];
+
+            for (var i = 0, l = this.model.getColumnLength(); i < l; i++) {
+                r.push(this.model.getColumn(i).getWidth());
+            }
+
+            return r;
+        }
+    }, {
+        key: "startResize",
+        value: function startResize(event) {
+            var _this2 = this;
+
+            var $eventTarget = $(event.target),
+                handle = $eventTarget.closest(".ui-resize-handle", this.view),
+                $column = $eventTarget.closest(".grid-column", this.view);
+
+            if (!handle.length || !$column.length) {
+                return;
+            }
+
+            var originalWidths = this.getCurrentWidths(),
+                startX = event.clientX,
+                startY = event.clientY,
+                $doc = $(event.target.ownerDocument),
+                column = this.model.getColumn($column.data("columnNumber"));
+
+            var onMouseMove = function onMouseMove(event) {
+                var dX = event.clientX - startX,
+                    sizes = _this2.calculateNewColumnSizes(column, dX);
+
+                if (sizes) _this2.setColumnWidths(sizes, false);
+            };
+
+            var onMouseUp = function onMouseUp(event) {
+                $doc.off("mousemove", onMouseMove);
+                $doc.off("mouseup", onMouseUp);
+
+                var dX = event.clientX - startX,
+                    sizes = _this2.calculateNewColumnSizes(column, dX);
+
+                _this2.setColumnWidths(sizes, true);
+                _this2.grid.render();
+            };
+
+            $doc.on("mousemove", onMouseMove);
+            $doc.on("mouseup", onMouseUp);
+        }
+    }, {
+        key: "calculateNewColumnSizes",
+        value: function calculateNewColumnSizes(column, change) {
+            if (change > 0) {
+                var r = {},
+                    width = void 0,
+                    expected = void 0;
+
+                while (column && change > 0) {
+                    if (column.isResizeable()) {
+                        expected = column.getWidth() + change;
+                        width = (0, _util.clamp)(expected, column.getMinWidth(), column.getMaxWidth());
+                        change = expected - width;
+                        r[column.columnNumber] = width;
+                    }
+
+                    column = column.prevColumn();
+                }
+
+                return r;
+            } else if (change < 0) {
+                var _r = {},
+                    _width = void 0,
+                    _expected = void 0;
+
+                while (column && change < 0) {
+                    if (column.isResizeable()) {
+                        _expected = column.getWidth() + change;
+                        _width = (0, _util.clamp)(_expected, column.getMinWidth(), column.getMaxWidth());
+                        change = _expected - _width;
+                        _r[column.columnNumber] = _width;
+                    }
+
+                    column = column.prevColumn();
+                }
+
+                return _r;
+            }
+        }
+
+        /**
+         * Refresh the size and position of every visible column.
+         */
+
+    }, {
+        key: "refresh",
+        value: function refresh() {
+            var _this3 = this;
+
+            var $columns = this.view.find(".grid-column"),
+                pos = null;
+
+            $columns.each(function (index, element) {
+                var $column = $(element),
+                    column = _this3.model.getColumn($column.data("columnNumber")),
+                    width = column.getWidth();
+
+                if (pos === null) {
+                    pos = column.getLeft();
+                }
+
+                $column.css({
+                    width: width,
+                    left: pos
+                });
+
+                pos += width;
+            });
+        }
+    }, {
+        key: "setColumnWidths",
+        value: function setColumnWidths(widths) {
+            var _this4 = this;
+
+            var _update = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
+            var $columns = this.view.find(".grid-column"),
+                pos = 0;
+
+            $columns.each(function (index, element) {
+                var $column = $(element),
+                    column = _this4.model.getColumn($column.data("columnNumber")),
+                    width = widths[column.columnNumber] != null ? widths[column.columnNumber] : column.getWidth();
+
+                $column.css({
+                    width: width,
+                    left: pos
+                });
+
+                if (_update) {
+                    column.setWidth(width);
+                }
+
+                pos += width;
+            });
+
+            this.view.css({
+                width: pos + 50
+            });
+        }
+    }, {
+        key: "model",
+        get: function get() {
+            return this.grid.model;
         }
     }]);
 

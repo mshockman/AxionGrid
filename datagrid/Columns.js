@@ -1,8 +1,12 @@
 
 
 export class CheckboxColumn {
-    constructor(name) {
+    constructor(name, options) {
         this.inputName = name;
+
+        if(options) {
+            Object.assign(this, options);
+        }
 
         this.cellFormatter = function(cell) {
             let checked = cell.getMetaData("checked") || false,
@@ -23,7 +27,7 @@ export class CheckboxColumn {
 
         this.label = function(column) {
             let inputName = column.getMetaData("inputName"),
-                input = $("<input type='checkbox' name='"+inputName+"'>");
+                input = $("<input type='checkbox' name='" + inputName + "'>");
 
             return input;
         }
