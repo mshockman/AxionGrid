@@ -4,14 +4,14 @@
  */
 import {clamp} from "./util";
 
-export class $GridDivCanvas {
-    constructor(container=null) {
+export class GridDivCanvas {
+    constructor(grid) {
         this.canvas = $("<div>").addClass("grid-canvas").css({
             position: "relative"
         });
 
-        if(container) {
-            this.canvas.appendTo(container);
+        if(grid) {
+            this.setGrid(grid);
         }
 
         this.canvas.on("change click", (event) => {
@@ -23,6 +23,10 @@ export class $GridDivCanvas {
 
             cell.handleEvent(event);
         });
+    }
+
+    setGrid(grid) {
+        this.grid = grid;
     }
 
     setDataModel(model) {
@@ -101,6 +105,8 @@ export class $GridDivCanvas {
 
         this.canvas.empty();
         this.canvas.append(frag);
+
+        if(this.grid) this.grid.publish("render");
     }
 
     appendTo(element) {

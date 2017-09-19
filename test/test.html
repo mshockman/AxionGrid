@@ -31,6 +31,7 @@
         .grid-column {
             border-right: 1px solid #ccc;
             display: inline-block;
+            cursor: move;
         }
 
         .ui-resize-handle {
@@ -74,6 +75,12 @@
 
         .ui-sortable-placeholder + .ui-sortable-helper + .grid-column {
             border-left: 1px solid #ccc;
+        }
+
+        .grid-column.ui-sortable-helper {
+            border-left: 1px solid #ccc;
+            background-color: #fff;
+            z-index: 3;
         }
     </style>
 </head>
@@ -142,22 +149,23 @@
         ];
 
         var model = new grid.DataModel({data: data, columns: columns, maxWidth: 400, minWidth: 30});
-        var header = new grid.GridHeader();
+        var canvas = new grid.GridDivCanvas();
+        var viewport = new grid.ViewPort();
 
-        header.appendTo("#container");
-
-        var canvas = new grid.$GridDivCanvas("#container");
-        var viewport = new grid.ViewPort("#container", canvas);
+        viewport.setCanvas(canvas);
+        canvas.setDataModel(model);
 
         var g = new grid.BaseGrid(model, viewport, canvas);
 
+        var header = new grid.GridHeader();
         var columnRow = new grid.ColumnRow(g);
         header.append(columnRow);
+        header.appendTo("#container");
         columnRow.render();
 
-        canvas.setDataModel(model);
-        // canvas.setViewPort(0, 3000, 1000, 1000);
-        viewport.refresh();
+        viewport.appendTo("#container");
+        g.render();
+
         header.bindToViewPort(viewport);
     </script>
 </body>

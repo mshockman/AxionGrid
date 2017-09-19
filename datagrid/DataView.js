@@ -4,7 +4,7 @@ import {MetaData} from "./MetaData";
 import {clamp, coordinateString} from "./util";
 
 export class DataModel {
-    constructor({data, columns, rowHeight=25, defaultColumnWidth=100, minWidth=null, maxWidth=null}) {
+    constructor({data, columns, rowHeight=25, defaultColumnWidth=100, minWidth=null, maxWidth=null, grid=null}) {
         this.rowHeight = rowHeight;
         this.defaultColumnWidth = defaultColumnWidth;
         this.minWidth = minWidth;
@@ -17,6 +17,11 @@ export class DataModel {
 
         if(data) this.setData(data);
         if(columns) this.setColumns(columns);
+        if(grid) this.setGrid(grid);
+    }
+
+    setGrid(grid) {
+        this.grid = grid;
     }
 
     /**
@@ -28,6 +33,7 @@ export class DataModel {
         this.rowData.clear();
         this.cellData.clear();
         this.data = data;
+        if(this.grid) this.grid.publish("data-change");
     }
 
     /**
@@ -42,6 +48,7 @@ export class DataModel {
         }
 
         this.columnData.length = columns.length;
+        if(this.grid) this.grid.publish("column-change");
     }
 
     /**
