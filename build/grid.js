@@ -10366,25 +10366,19 @@ var ColumnRow = exports.ColumnRow = function () {
 
             var originalWidths = this.getCurrentWidths(),
                 startX = event.clientX,
-                startY = event.clientY,
                 $doc = $(event.target.ownerDocument),
                 column = this.model.getColumn($column.data("columnNumber"));
 
             var onMouseMove = function onMouseMove(event) {
-                var dX = event.clientX - startX,
-                    sizes = _this2.calculateNewColumnSizes(column, dX);
-
-                if (sizes) _this2.setColumnWidths(sizes, false);
+                _this2._modColumnWidths(originalWidths, column, event.clientX - startX);
+                _this2.refresh();
             };
 
             var onMouseUp = function onMouseUp(event) {
                 $doc.off("mousemove", onMouseMove);
                 $doc.off("mouseup", onMouseUp);
 
-                var dX = event.clientX - startX,
-                    sizes = _this2.calculateNewColumnSizes(column, dX);
-
-                _this2.setColumnWidths(sizes, true);
+                _this2._modColumnWidths(originalWidths, column, event.clientX - startX);
                 _this2.grid.render();
             };
 
@@ -10392,42 +10386,19 @@ var ColumnRow = exports.ColumnRow = function () {
             $doc.on("mouseup", onMouseUp);
         }
     }, {
-        key: "calculateNewColumnSizes",
-        value: function calculateNewColumnSizes(column, change) {
-            if (change > 0) {
-                var r = {},
-                    width = void 0,
-                    expected = void 0;
+        key: "_modColumnWidths",
+        value: function _modColumnWidths(original, column, change) {
+            var expected = void 0;
 
-                while (column && change > 0) {
-                    if (column.isResizeable()) {
-                        expected = column.getWidth() + change;
-                        width = (0, _util.clamp)(expected, column.getMinWidth(), column.getMaxWidth());
-                        change = expected - width;
-                        r[column.columnNumber] = width;
-                    }
-
-                    column = column.prevColumn();
+            while (column && change) {
+                if (column.isResizeable()) {
+                    column.setWidth(original[column.columnNumber]);
+                    expected = column.getWidth() + change;
+                    column.addWidth(change);
+                    change = expected - column.getWidth();
                 }
 
-                return r;
-            } else if (change < 0) {
-                var _r = {},
-                    _width = void 0,
-                    _expected = void 0;
-
-                while (column && change < 0) {
-                    if (column.isResizeable()) {
-                        _expected = column.getWidth() + change;
-                        _width = (0, _util.clamp)(_expected, column.getMinWidth(), column.getMaxWidth());
-                        change = _expected - _width;
-                        _r[column.columnNumber] = _width;
-                    }
-
-                    column = column.prevColumn();
-                }
-
-                return _r;
+                column = column.prevColumn();
             }
         }
 
@@ -10458,37 +10429,6 @@ var ColumnRow = exports.ColumnRow = function () {
                 });
 
                 pos += width;
-            });
-        }
-    }, {
-        key: "setColumnWidths",
-        value: function setColumnWidths(widths) {
-            var _this4 = this;
-
-            var _update = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-
-            var $columns = this.view.find(".grid-column"),
-                pos = 0;
-
-            $columns.each(function (index, element) {
-                var $column = $(element),
-                    column = _this4.model.getColumn($column.data("columnNumber")),
-                    width = widths[column.columnNumber] != null ? widths[column.columnNumber] : column.getWidth();
-
-                $column.css({
-                    width: width,
-                    left: pos
-                });
-
-                if (_update) {
-                    column.setWidth(width);
-                }
-
-                pos += width;
-            });
-
-            this.view.css({
-                width: pos + 50
             });
         }
     }, {

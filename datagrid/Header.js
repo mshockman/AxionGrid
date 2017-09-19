@@ -2,6 +2,7 @@
 
 import {clamp} from "./util";
 
+
 export class GridHeader {
     constructor() {
         this.view = $("<div class='grid-header'>");
@@ -122,25 +123,19 @@ export class ColumnRow {
 
         let originalWidths = this.getCurrentWidths(),
             startX = event.clientX,
-            startY = event.clientY,
             $doc = $(event.target.ownerDocument),
             column = this.model.getColumn($column.data("columnNumber"));
 
         let onMouseMove = (event) => {
-            let dX = event.clientX - startX,
-                sizes = this.calculateNewColumnSizes(column, dX);
-
-            if(sizes) this.setColumnWidths(sizes, false);
+            this._modColumnWidths(originalWidths, column, event.clientX - startX);
+            this.refresh();
         };
 
         let onMouseUp = (event) => {
             $doc.off("mousemove", onMouseMove);
             $doc.off("mouseup", onMouseUp);
 
-            let dX = event.clientX - startX,
-                sizes = this.calculateNewColumnSizes(column, dX);
-
-            this.setColumnWidths(sizes, true);
+            this._modColumnWidths(originalWidths, column, event.clientX - startX);
             this.grid.render();
         };
 
@@ -148,41 +143,18 @@ export class ColumnRow {
         $doc.on("mouseup", onMouseUp);
     }
 
-    calculateNewColumnSizes(column, change) {
-        if(change > 0) {
-            let r = {},
-                width,
-                expected;
+    _modColumnWidths(original, column, change) {
+        let expected;
 
-            while(column && change > 0) {
-                if(column.isResizeable()) {
-                    expected = column.getWidth() + change;
-                    width = clamp(expected, column.getMinWidth(), column.getMaxWidth());
-                    change = expected - width;
-                    r[column.columnNumber] = width;
-                }
-
-                column = column.prevColumn();
+        while(column && change) {
+            if(column.isResizeable()) {
+                column.setWidth(original[column.columnNumber]);
+                expected = column.getWidth() + change;
+                column.addWidth(change);
+                change = expected - column.getWidth();
             }
 
-            return r;
-        } else if(change < 0) {
-            let r = {},
-                width,
-                expected;
-
-            while(column && change < 0) {
-                if(column.isResizeable()) {
-                    expected = column.getWidth() + change;
-                    width = clamp(expected, column.getMinWidth(), column.getMaxWidth());
-                    change = expected - width;
-                    r[column.columnNumber] = width;
-                }
-
-                column = column.prevColumn();
-            }
-
-            return r;
+            column = column.prevColumn();
         }
     }
 
@@ -208,32 +180,6 @@ export class ColumnRow {
             });
 
             pos += width;
-        });
-    }
-
-    setColumnWidths(widths, _update=true) {
-        let $columns = this.view.find(".grid-column"),
-            pos = 0;
-
-        $columns.each((index, element) => {
-            let $column = $(element),
-                column = this.model.getColumn($column.data("columnNumber")),
-                width = widths[column.columnNumber] != null ? widths[column.columnNumber] : column.getWidth();
-
-            $column.css({
-                width: width,
-                left: pos
-            });
-
-            if(_update) {
-                column.setWidth(width);
-            }
-
-            pos += width;
-        });
-
-        this.view.css({
-            width: pos + 50
         });
     }
 }
