@@ -85,15 +85,18 @@
         }
 
         .inline-filter-bar {
-            height: 30px;
+            height: 50px;
             white-space: nowrap;
+            vertical-align: top;
         }
 
         .inline-filter-bar .grid-column {
-            height: 30px;
+            height: 50px;
+            padding: 5px;
             border-right: 1px solid #ccc;
             border-top: 1px solid #ccc;
             box-sizing: border-box;
+            vertical-align: top;
         }
     </style>
 </head>
@@ -133,11 +136,12 @@
             },
             {
                 id: "name",
-                width: 8500,
+                width: 200,
                 label: "Name",
                 resizeable: true,
                 sortable: true,
-                maxWidth: 9000
+                maxWidth: 9000,
+                inlineFilter: new grid.TextFilter("name")
             },
             {
                 id: "progress",

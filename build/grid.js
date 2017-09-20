@@ -3935,7 +3935,7 @@ if (fails(function () { return new $WeakMap().set((Object.freeze || Object)(tmp)
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.InlineFilterBar = exports.ColumnRow = exports.GridHeader = exports.BaseGrid = exports.CheckboxColumn = exports.ViewPort = exports.GridDivCanvas = exports.MetaData = exports.util = exports.DataModel = undefined;
+exports.TextFilter = exports.InlineFilterBar = exports.ColumnRow = exports.GridHeader = exports.BaseGrid = exports.CheckboxColumn = exports.ViewPort = exports.GridDivCanvas = exports.MetaData = exports.util = exports.DataModel = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -4046,6 +4046,7 @@ exports.BaseGrid = BaseGrid;
 exports.GridHeader = _Header.GridHeader;
 exports.ColumnRow = _Header.ColumnRow;
 exports.InlineFilterBar = _InlineFilters.InlineFilterBar;
+exports.TextFilter = _InlineFilters.TextFilter;
 
 /***/ }),
 /* 127 */
@@ -10666,6 +10667,8 @@ var InlineFilterBar = exports.InlineFilterBar = function () {
             filterBar: this
         });
 
+        this._render = this.render.bind(this);
+
         if (grid) this.setGrid(grid);
     }
 
@@ -10674,8 +10677,8 @@ var InlineFilterBar = exports.InlineFilterBar = function () {
         value: function setGrid(grid) {
             this.grid = grid;
 
-            this.grid.subscribe("refresh", this.render.bind(this));
-            this.grid.subscribe("resizing", this.render.bind(this));
+            this.grid.subscribe("render", this._render);
+            this.grid.subscribe("resizing", this._render);
         }
     }, {
         key: "render",
@@ -10712,9 +10715,87 @@ var InlineFilterBar = exports.InlineFilterBar = function () {
         value: function appendTo(element) {
             this.view.appendTo(element);
         }
+    }, {
+        key: "getFilters",
+        value: function getFilters() {
+            var r = {};
+
+            for (var i = 0, l = this.grid.model.getColumnLength(); i < l; i++) {
+                var column = this.grid.model.getColumn(i),
+                    inlineFilter = column.getMetaData("inlineFilter");
+
+                if (inlineFilter) {
+                    r[inlineFilter.getField()] = inlineFilter.getFilter();
+                }
+            }
+
+            return r;
+        }
     }]);
 
     return InlineFilterBar;
+}();
+
+var TextFilter = exports.TextFilter = function () {
+    function TextFilter(field) {
+        _classCallCheck(this, TextFilter);
+
+        this.field = field;
+
+        this.operators = [["Exact", "exact", true], ["IEXACT", "iexact"], ["Not Equals", "not"], ["CONTAINS", "contains"], ["ICONTAINS", "icontains"], ["STARTSWITH", "startswith"], ["ISTARTSWITH", "istartswith"], ["ENDSWITH", "endswith"], ["IENDSWITH", "iendswith"], ["In List", "in"], ["Is Empty", "is_empty"], ["Is Not Empty", "not_empty"]];
+
+        this.view = $("<div class='inline-filter'>");
+
+        var wrapper = $("<div>");
+        this.select = $("<select>");
+
+        for (var i = 0, l = this.operators.length; i < l; i++) {
+            var $option = $("<option value=\"" + this.operators[i][1] + "\">" + this.operators[i][0] + "</option>");
+
+            if (this.operators[i][2] === true) {
+                $option.prop("selected", true);
+            }
+
+            this.select.append($option);
+        }
+
+        wrapper.append(this.select);
+        this.view.append(wrapper);
+
+        wrapper = $("<div>");
+        this.textbox = $("<input type='text'>");
+
+        wrapper.append(this.textbox);
+        this.view.append(wrapper);
+    }
+
+    _createClass(TextFilter, [{
+        key: "appendTo",
+        value: function appendTo(element) {
+            this.view.appendTo(element);
+        }
+    }, {
+        key: "getFilter",
+        value: function getFilter() {
+            return {
+                operator: this.select.val(),
+                filter: this.textbox.val()
+            };
+        }
+    }, {
+        key: "setFilter",
+        value: function setFilter(filter) {
+            this.select.val(filter.operator);
+            this.textbox.val(filter.filter);
+        }
+    }, {
+        key: "getField",
+        value: function getField() {
+            return this.field;
+        }
+    }]);
+
+    return TextFilter;
 }();
 
 /***/ })
