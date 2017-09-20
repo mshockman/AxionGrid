@@ -4235,6 +4235,11 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
 
             return r;
         }
+    }, {
+        key: "view",
+        get: function get() {
+            return this.canvas;
+        }
     }]);
 
     return GridDivCanvas;
@@ -4258,14 +4263,29 @@ var CheckboxColumn = exports.CheckboxColumn = function CheckboxColumn(name, opti
 
     this.inputName = name;
 
+    var label = $("<input type='checkbox' name='" + name + "'>");
+
+    label.on("change", function (event) {
+        var val = label.is(":checked"),
+            grid = $(event.target).closest(".grid-column").data("grid");
+
+        console.log("OK");
+
+        for (var i = 0, l = grid.model.getDataLength(); i < l; i++) {
+            var row = grid.model.getRow(i);
+            row.setMetaData(name, val);
+        }
+
+        grid.canvas.view.find("input[name='" + name + "']").prop("checked", val);
+    });
+
     if (options) {
         Object.assign(this, options);
     }
 
     this.cellFormatter = function (cell) {
-        var checked = cell.getMetaData("checked") || false,
-            inputName = cell.getMetaData("inputName"),
-            r = $("<input type='checkbox' name='" + inputName + "'>");
+        var checked = cell.getRow().getMetaData(name) || false,
+            r = $("<input type='checkbox' name='" + name + "'>");
 
         if (checked) {
             r.prop("checked", true);
@@ -4276,14 +4296,16 @@ var CheckboxColumn = exports.CheckboxColumn = function CheckboxColumn(name, opti
 
     this.onChange = function (cell, event) {
         var val = $(event.target).is(":checked");
-        cell.setMetaData("checked", val);
+
+        cell.getRow().setMetaData(name, val);
+
+        if (!val) {
+            label.prop("checked", false);
+        }
     };
 
-    this.label = function (column) {
-        var inputName = column.getMetaData("inputName"),
-            input = $("<input type='checkbox' name='" + inputName + "'>");
-
-        return input;
+    this.label = function () {
+        return label;
     };
 };
 
@@ -4320,7 +4342,9 @@ var DataModel = exports.DataModel = function () {
             _ref$maxWidth = _ref.maxWidth,
             maxWidth = _ref$maxWidth === undefined ? null : _ref$maxWidth,
             _ref$grid = _ref.grid,
-            grid = _ref$grid === undefined ? null : _ref$grid;
+            grid = _ref$grid === undefined ? null : _ref$grid,
+            _ref$pk = _ref.pk,
+            pk = _ref$pk === undefined ? null : _ref$pk;
 
         _classCallCheck(this, DataModel);
 
@@ -4329,6 +4353,7 @@ var DataModel = exports.DataModel = function () {
         this.minWidth = minWidth;
         this.maxWidth = maxWidth;
         this.data = null;
+        this.pk = pk;
 
         this.rowData = new _MetaData.MetaData();
         this.cellData = new _MetaData.MetaData();
@@ -4416,6 +4441,17 @@ var DataModel = exports.DataModel = function () {
             }
         }
     }, {
+        key: "setDataItem",
+        value: function setDataItem(index, key, value) {
+            if (this.data) {
+                if (this.data.setDataItem) {
+                    this.data.setDataItem(index, key, value);
+                } else {
+                    this.data[index][key] = value;
+                }
+            }
+        }
+    }, {
         key: "getColumn",
         value: function getColumn(index) {
             if (index < 0 || index >= this.getColumnLength()) {
@@ -4484,17 +4520,17 @@ var Row = function () {
     _createClass(Row, [{
         key: "getAttributes",
         value: function getAttributes() {
-            return this.model.rowData.get("attributes") || {};
+            return this.getMetaData("attributes") || {};
         }
     }, {
         key: "getStyle",
         value: function getStyle() {
-            return this.model.rowData.get("style") || {};
+            return this.getMetaData("style") || {};
         }
     }, {
         key: "getClasses",
         value: function getClasses() {
-            return this.model.rowData.get("classes") || "";
+            return this.getMetaData("classes") || "";
         }
     }, {
         key: "getCell",
@@ -4544,23 +4580,23 @@ var Cell = function () {
         key: "getInheritedObject",
         value: function getInheritedObject(key, rowKey, columnKey) {
             var r = {},
-                d = this.model.columnData.get(this.cellNumber, columnKey);
+                d = this.getColumn().getMetaData(columnKey);
 
             if (d) Object.assign(r, d);
-            d = this.model.rowData.get(this.rowNumber, rowKey);
+            d = this.getRow().getMetaData(rowKey);
             if (d) Object.assign(r, d);
-            d = this.model.cellData.get(this.cellNumber, key);
+            d = this.getMetaData(key);
             if (d) Object.assign(r, d);
             return r;
         }
     }, {
         key: "getInheritedProperty",
         value: function getInheritedProperty(key, rowKey, columnKey) {
-            var r = this.model.cellData.get(this.cellNumber, key);
+            var r = this.getMetaData(key);
             if (r !== undefined) return r;
-            r = this.model.rowData.get(this.rowNumber, rowKey);
+            r = this.getRow().getMetaData(rowKey);
             if (r !== undefined) return r;
-            return this.model.columnData.get(this.cellNumber, columnKey);
+            return this.getColumn().getMetaData(columnKey);
         }
     }, {
         key: "getRow",
@@ -4596,7 +4632,7 @@ var Cell = function () {
     }, {
         key: "getRawValue",
         value: function getRawValue() {
-            var id = this.model.columnData.get(this.cellNumber, "id");
+            var id = this.getColumn().getMetaData("id");
 
             if (id) {
                 return this.model.getDataItem(this.rowNumber)[id];
@@ -4620,7 +4656,7 @@ var Cell = function () {
     }, {
         key: "getWidth",
         value: function getWidth() {
-            return this.getColumn(this.cellNumber).getWidth();
+            return this.getColumn().getWidth();
         }
     }, {
         key: "handleEvent",
@@ -4703,6 +4739,11 @@ var Column = function () {
             return this.model.columnData.get(this.columnNumber, key);
         }
     }, {
+        key: "getDefinition",
+        value: function getDefinition() {
+            return this.model.columnData.get(this.columnNumber);
+        }
+    }, {
         key: "getCell",
         value: function getCell(index) {
             return new Cell(this.model, index, this.columnNumber);
@@ -4774,11 +4815,6 @@ var Column = function () {
         key: "prevColumn",
         value: function prevColumn() {
             return this.columnNumber - 1 >= 0 ? new Column(this.model, this.columnNumber - 1) : null;
-        }
-    }, {
-        key: "getDefinition",
-        value: function getDefinition() {
-            return this.model.columnData.get(this.columnNumber);
         }
     }]);
 
@@ -4916,7 +4952,10 @@ var ColumnRow = exports.ColumnRow = function () {
                 $column.addClass(column.getClasses());
                 $column.attr(column.getAttributes());
                 $column.css(column.getStyle());
-                $column.data("columnNumber", column.columnNumber);
+                $column.data({
+                    "columnNumber": column.columnNumber,
+                    "grid": this.grid
+                });
 
                 $column.css({
                     position: "relative",

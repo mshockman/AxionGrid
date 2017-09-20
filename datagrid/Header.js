@@ -96,7 +96,10 @@ export class ColumnRow {
             $column.addClass(column.getClasses());
             $column.attr(column.getAttributes());
             $column.css(column.getStyle());
-            $column.data("columnNumber", column.columnNumber);
+            $column.data({
+                "columnNumber": column.columnNumber,
+                "grid": this.grid
+            });
 
             $column.css({
                 position: "relative",

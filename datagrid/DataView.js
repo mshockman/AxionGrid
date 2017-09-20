@@ -4,12 +4,13 @@ import {MetaData} from "./MetaData";
 import {clamp, coordinateString} from "./util";
 
 export class DataModel {
-    constructor({data, columns, rowHeight=25, defaultColumnWidth=100, minWidth=null, maxWidth=null, grid=null}) {
+    constructor({data, columns, rowHeight=25, defaultColumnWidth=100, minWidth=null, maxWidth=null, grid=null, pk=null}) {
         this.rowHeight = rowHeight;
         this.defaultColumnWidth = defaultColumnWidth;
         this.minWidth = minWidth;
         this.maxWidth = maxWidth;
         this.data = null;
+        this.pk = pk;
 
         this.rowData = new MetaData();
         this.cellData = new MetaData();
@@ -83,6 +84,16 @@ export class DataModel {
         }
     }
 
+    setDataItem(index, key, value) {
+        if(this.data) {
+            if(this.data.setDataItem) {
+                this.data.setDataItem(index, key, value);
+            } else {
+                this.data[index][key] = value;
+            }
+        }
+    }
+
     getColumn(index) {
         if(index < 0 || index >= this.getColumnLength()) {
             throw new Error("Cell Number is out of bounds.");
@@ -139,15 +150,15 @@ class Row {
     }
 
     getAttributes() {
-        return this.model.rowData.get("attributes") || {};
+        return this.getMetaData("attributes") || {};
     }
 
     getStyle() {
-        return this.model.rowData.get("style") || {};
+        return this.getMetaData("style") || {};
     }
 
     getClasses() {
-        return this.model.rowData.get("classes") || "";
+        return this.getMetaData("classes") || "";
     }
 
     getCell(cell_number) {
@@ -185,22 +196,22 @@ class Cell {
 
     getInheritedObject(key, rowKey, columnKey) {
         let r = {},
-            d = this.model.columnData.get(this.cellNumber, columnKey);
+            d = this.getColumn().getMetaData(columnKey);
 
         if(d) Object.assign(r, d);
-        d = this.model.rowData.get(this.rowNumber, rowKey);
+        d = this.getRow().getMetaData(rowKey);
         if(d) Object.assign(r, d);
-        d = this.model.cellData.get(this.cellNumber, key);
+        d = this.getMetaData(key);
         if(d) Object.assign(r, d);
         return r;
     }
 
     getInheritedProperty(key, rowKey, columnKey) {
-        let r = this.model.cellData.get(this.cellNumber, key);
+        let r = this.getMetaData(key);
         if(r !== undefined) return r;
-        r = this.model.rowData.get(this.rowNumber, rowKey);
+        r = this.getRow().getMetaData(rowKey);
         if(r !== undefined) return r;
-        return this.model.columnData.get(this.cellNumber, columnKey);
+        return this.getColumn().getMetaData(columnKey);
     }
 
     getRow() {
@@ -229,7 +240,7 @@ class Cell {
     }
 
     getRawValue() {
-        let id = this.model.columnData.get(this.cellNumber, "id");
+        let id = this.getColumn().getMetaData("id");
 
         if(id) {
             return this.model.getDataItem(this.rowNumber)[id];
@@ -249,7 +260,7 @@ class Cell {
     }
 
     getWidth() {
-        return this.getColumn(this.cellNumber).getWidth();
+        return this.getColumn().getWidth();
     }
 
     handleEvent(event) {
@@ -319,6 +330,10 @@ class Column {
         return this.model.columnData.get(this.columnNumber, key);
     }
 
+    getDefinition() {
+        return this.model.columnData.get(this.columnNumber);
+    }
+
     getCell(index) {
         return new Cell(this.model, index, this.columnNumber);
     }
@@ -380,10 +395,6 @@ class Column {
 
     prevColumn() {
         return this.columnNumber - 1 >= 0 ? new Column(this.model, this.columnNumber-1) : null;
-    }
-
-    getDefinition() {
-        return this.model.columnData.get(this.columnNumber);
     }
 }
 

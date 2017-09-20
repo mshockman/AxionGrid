@@ -25,6 +25,10 @@ export class GridDivCanvas {
         });
     }
 
+    get view() {
+        return this.canvas;
+    }
+
     setGrid(grid) {
         this.grid = grid;
     }
