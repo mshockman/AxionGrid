@@ -151,6 +151,7 @@ export class ColumnRow {
 
         let onMouseMove = (event) => {
             this._modColumnWidths(originalWidths, column, event.clientX - startX);
+            event.preventDefault();
             this.refresh(false);
             this.grid.publish("resizing");
         };

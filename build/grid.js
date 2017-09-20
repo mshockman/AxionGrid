@@ -5111,6 +5111,7 @@ var ColumnRow = exports.ColumnRow = function () {
 
             var onMouseMove = function onMouseMove(event) {
                 _this3._modColumnWidths(originalWidths, column, event.clientX - startX);
+                event.preventDefault();
                 _this3.refresh(false);
                 _this3.grid.publish("resizing");
             };
