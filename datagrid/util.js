@@ -93,3 +93,29 @@ export function clamp(value, min=null, max=null) {
 
     return value;
 }
+
+
+export function dictsEqual(object1, object2) {
+    if(typeof object1 !== typeof object2) {
+        return false;
+    }
+
+    let keys1 = Object.keys(object1),
+        keys2 = Object.keys(object2);
+
+    if(keys1.length !== keys2.length) {
+        return false;
+    }
+
+    for(let i = 0, l = keys1.length; i < l; i++) {
+        let key = keys1[i];
+
+        if(keys2.indexOf(key) === -1) {
+            return false;
+        } else if(object1[key] !== object2[key]) {
+            return false;
+        }
+    }
+
+    return true;
+}

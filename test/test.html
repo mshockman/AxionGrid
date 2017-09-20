@@ -26,6 +26,7 @@
 
         .grid-header-viewport {
             width: 1000px;
+            overflow: hidden;
         }
 
         .grid-column {
@@ -82,6 +83,18 @@
             background-color: #fff;
             z-index: 3;
         }
+
+        .inline-filter-bar {
+            height: 30px;
+            white-space: nowrap;
+        }
+
+        .inline-filter-bar .grid-column {
+            height: 30px;
+            border-right: 1px solid #ccc;
+            border-top: 1px solid #ccc;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
@@ -120,10 +133,11 @@
             },
             {
                 id: "name",
-                width: 200,
+                width: 8500,
                 label: "Name",
                 resizeable: true,
-                sortable: true
+                sortable: true,
+                maxWidth: 9000
             },
             {
                 id: "progress",
@@ -149,19 +163,24 @@
         ];
 
         var model = new grid.DataModel({data: data, columns: columns, maxWidth: 400, minWidth: 30});
-        var canvas = new grid.GridDivCanvas();
+        var canvas = new grid.GridDivCanvas(null, {cropColumns: false});
         var viewport = new grid.ViewPort();
 
-        viewport.setCanvas(canvas);
-        canvas.setDataModel(model);
+
 
         var g = new grid.BaseGrid(model, viewport, canvas);
 
         var header = new grid.GridHeader();
         var columnRow = new grid.ColumnRow(g);
+        var filterRow = new grid.InlineFilterBar(g);
+
+        viewport.setCanvas(canvas);
+
         header.append(columnRow);
+        header.append(filterRow);
         header.appendTo("#container");
         columnRow.render();
+        filterRow.render();
 
         viewport.appendTo("#container");
         g.render();

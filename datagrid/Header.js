@@ -152,6 +152,7 @@ export class ColumnRow {
         let onMouseMove = (event) => {
             this._modColumnWidths(originalWidths, column, event.clientX - startX);
             this.refresh(false);
+            this.grid.publish("resizing");
         };
 
         let onMouseUp = (event) => {
@@ -161,6 +162,7 @@ export class ColumnRow {
             this._modColumnWidths(originalWidths, column, event.clientX - startX);
             this.refresh(true);
             this.grid.render();
+            this.grid.publish("refresh");
         };
 
         $doc.on("mousemove", onMouseMove);

@@ -5,6 +5,7 @@ import {GridDivCanvas} from "./Canvas";
 import {ViewPort} from "./ViewPort";
 import {CheckboxColumn} from "./Columns";
 import {GridHeader, ColumnRow} from "./Header";
+import {InlineFilterBar} from "./InlineFilters";
 
 import {publisher} from "./Publisher";
 
@@ -79,5 +80,6 @@ export {
     CheckboxColumn,
     BaseGrid,
     GridHeader,
-    ColumnRow
+    ColumnRow,
+    InlineFilterBar,
 };

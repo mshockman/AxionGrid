@@ -2,10 +2,19 @@
  * A canvas object is responsible for drawing the currently viewable parts of the data model to the screen and catching
  * and passing events that happen to those element to the grid.
  */
-import {clamp} from "./util";
+import {clamp, dictsEqual} from "./util";
 
 export class GridDivCanvas {
-    constructor(grid) {
+    constructor(grid, {cropColumns=false, refreshRate=100, incrementX=20, incrementY=250, verticalPadding=1000, horizontalPadding=1000, speedLimit=1000}={}) {
+        this.cropColumns = cropColumns;
+        this.refreshRate = refreshRate;
+        this.incrementX = incrementX;
+        this.incrementY = incrementY;
+        this.verticalPadding = verticalPadding;
+        this.horizontalPadding = horizontalPadding;
+        this.speedLimit = speedLimit;
+
+
         this.canvas = $("<div>").addClass("grid-canvas").css({
             position: "relative"
         });
@@ -29,21 +38,57 @@ export class GridDivCanvas {
         return this.canvas;
     }
 
+    get model() {
+        return this.grid.model;
+    }
+
     setGrid(grid) {
         this.grid = grid;
     }
 
-    setDataModel(model) {
-        this.model = model;
-    }
-
     setViewPort(x, y, width, height) {
         this.viewport = {
-            x: x,
-            y: y,
-            width: width,
-            height: height
+            x: x - this.horizontalPadding,
+            y: y - this.verticalPadding,
+            width: width + (this.horizontalPadding*2),
+            height: height + (this.verticalPadding*2),
+            incrementX: this.cropColumns ? Math.floor(x / this.incrementX) : 0,
+            incrementY: Math.floor(y / this.incrementY)
         };
+
+        if(!this._viewport) {
+            this.render();
+            return;
+        }
+
+        if(!this._timer && this.hasChanged()) {
+            let x = this._viewport.x,
+                y = this._viewport.y;
+
+            let onTimeout = () => {
+                let dX = Math.abs(this.viewport.x - x),
+                    dY = Math.abs(this.viewport.y - y);
+
+                if(this.speedLimit && (dX > this.speedLimit || dY > this.speedLimit)) {
+                    x = this.viewport.x;
+                    y = this.viewport.y;
+                    this._timer = setTimeout(onTimeout, this.refreshRate);
+                    return;
+                }
+
+                this._timer = null;
+                if(this.hasChanged()) this.render();
+            };
+
+            this._timer = setTimeout(onTimeout, this.refreshRate);
+        }
+    }
+
+    hasChanged() {
+        return this.viewport.width !== this._viewport.width ||
+            this.viewport.height !== this._viewport.height ||
+            this.viewport.incrementX !== this._viewport.incrementX ||
+            this.viewport.incrementY !== this._viewport.incrementY;
     }
 
     render() {
@@ -52,6 +97,8 @@ export class GridDivCanvas {
             rowPos = 0,
             totalWidth = this.model.getWidth(),
             frag = document.createDocumentFragment();
+
+        this._viewport = this.viewport;
 
         this.canvas.css({
             height: this.model.getHeight(),
@@ -135,6 +182,10 @@ export class GridDivCanvas {
 
         r.start = 0;
         r.stop = l;
+
+        if(!this.cropColumns) {
+            return r;
+        }
 
         for(; i < l; i++) {
             column = this.model.getColumn(i);
