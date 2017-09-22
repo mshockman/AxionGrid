@@ -1,6 +1,5 @@
 import {DataModel} from "./DataView";
 import * as util from "./util";
-import {MetaData} from "./MetaData";
 import {GridDivCanvas} from "./Canvas";
 import {ViewPort} from "./ViewPort";
 
@@ -14,7 +13,6 @@ import {BaseGrid} from './Grid';
 export {
     DataModel,
     util,
-    MetaData,
     GridDivCanvas,
     ViewPort,
     CheckboxColumn,

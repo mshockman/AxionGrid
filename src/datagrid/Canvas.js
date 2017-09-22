@@ -44,6 +44,15 @@ export class GridDivCanvas {
 
     setGrid(grid) {
         this.grid = grid;
+
+        this.grid.subscribe("scroll", (viewport) => {
+            this.setViewPort(
+                viewport.left,
+                viewport.top,
+                viewport.width,
+                viewport.height
+            )
+        });
     }
 
     setViewPort(x, y, width, height) {
@@ -92,6 +101,11 @@ export class GridDivCanvas {
     }
 
     render() {
+        if(!this.viewport) {
+            let v = this.grid.viewport.getViewPort();
+            this.setViewPort(v.left, v.top, v.width, v.height);
+        }
+
         let rowRange = this.getRowRange(this.viewport.y, this.viewport.y + this.viewport.height),
             columnRange = this.getColumnRange(this.viewport.x, this.viewport.x + this.viewport.width),
             rowPos = 0,

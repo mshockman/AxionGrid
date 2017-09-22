@@ -178,18 +178,17 @@
         var columnRow = new grid.ColumnRow(g);
         var filterRow = new grid.InlineFilterBar(g);
 
-        viewport.setCanvas(canvas);
-
         header.append(columnRow);
         header.append(filterRow);
         header.appendTo("#container");
         columnRow.render();
         filterRow.render();
 
+        viewport.append(canvas);
         viewport.appendTo("#container");
-        g.render();
 
         header.bindToViewPort(viewport);
+        g.render();
     </script>
 
     <br><br><h3>Test</h3>

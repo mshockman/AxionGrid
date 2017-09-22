@@ -2905,92 +2905,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 91 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var MetaData = exports.MetaData = function () {
-    function MetaData(metadata) {
-        _classCallCheck(this, MetaData);
-
-        this.data = {};
-        this.dataCache = {};
-
-        if (metadata) this.setMetaData(metadata);
-    }
-
-    _createClass(MetaData, [{
-        key: "clear",
-        value: function clear() {
-            this.data = {};
-            this.dataCache = {};
-        }
-    }, {
-        key: "set",
-        value: function set(index, key, value) {
-            if (!this.data[index]) {
-                this.data[index] = {};
-            }
-
-            if (arguments.length === 2 && (typeof key === "undefined" ? "undefined" : _typeof(key)) === "object") {
-                Object.assign(this.data[index], key);
-            } else {
-                this.data[index][key] = value;
-            }
-        }
-    }, {
-        key: "get",
-        value: function get(index, key) {
-            if (this.data[index]) {
-                return arguments.length > 1 ? this.data[index][key] : this.data[index];
-            }
-        }
-    }, {
-        key: "remove",
-        value: function remove(index, key) {
-            if (this.data[index]) {
-                delete this.data[index][key];
-            }
-        }
-    }, {
-        key: "cache",
-        value: function cache(index, key, value) {
-            if (arguments.length === 1) {
-                return this.dataCache[index];
-            } else if (arguments.length === 2) {
-                return this.dataCache[index] ? this.dataCache[index][key] : undefined;
-            } else if (arguments.length === 3) {
-                if (value === undefined) {
-                    if (this.dataCache[index]) {
-                        delete this.dataCache[index][key];
-                    }
-                } else {
-                    if (!this.dataCache[index]) {
-                        this.dataCache[index] = {};
-                    }
-
-                    this.dataCache[index][key] = value;
-                }
-            }
-        }
-    }]);
-
-    return MetaData;
-}();
-
-/***/ }),
+/* 91 */,
 /* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3935,15 +3850,13 @@ if (fails(function () { return new $WeakMap().set((Object.freeze || Object)(tmp)
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.TextFilter = exports.InlineFilterBar = exports.ColumnRow = exports.GridHeader = exports.BaseGrid = exports.CheckboxColumn = exports.ViewPort = exports.GridDivCanvas = exports.MetaData = exports.util = exports.DataModel = undefined;
+exports.TextFilter = exports.InlineFilterBar = exports.ColumnRow = exports.GridHeader = exports.BaseGrid = exports.CheckboxColumn = exports.ViewPort = exports.GridDivCanvas = exports.util = exports.DataModel = undefined;
 
 var _DataView = __webpack_require__(129);
 
 var _util = __webpack_require__(63);
 
 var util = _interopRequireWildcard(_util);
-
-var _MetaData = __webpack_require__(91);
 
 var _Canvas = __webpack_require__(128);
 
@@ -3961,7 +3874,6 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 exports.DataModel = _DataView.DataModel;
 exports.util = util;
-exports.MetaData = _MetaData.MetaData;
 exports.GridDivCanvas = _Canvas.GridDivCanvas;
 exports.ViewPort = _ViewPort.ViewPort;
 exports.CheckboxColumn = _CheckboxColumn.CheckboxColumn;
@@ -4080,12 +3992,18 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
     _createClass(GridDivCanvas, [{
         key: "setGrid",
         value: function setGrid(grid) {
+            var _this2 = this;
+
             this.grid = grid;
+
+            this.grid.subscribe("scroll", function (viewport) {
+                _this2.setViewPort(viewport.left, viewport.top, viewport.width, viewport.height);
+            });
         }
     }, {
         key: "setViewPort",
         value: function setViewPort(x, y, width, height) {
-            var _this2 = this;
+            var _this3 = this;
 
             this.viewport = {
                 x: x - this.horizontalPadding,
@@ -4106,18 +4024,18 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
                     _y = this._viewport.y;
 
                 var onTimeout = function onTimeout() {
-                    var dX = Math.abs(_this2.viewport.x - _x2),
-                        dY = Math.abs(_this2.viewport.y - _y);
+                    var dX = Math.abs(_this3.viewport.x - _x2),
+                        dY = Math.abs(_this3.viewport.y - _y);
 
-                    if (_this2.speedLimit && (dX > _this2.speedLimit || dY > _this2.speedLimit)) {
-                        _x2 = _this2.viewport.x;
-                        _y = _this2.viewport.y;
-                        _this2._timer = setTimeout(onTimeout, _this2.refreshRate);
+                    if (_this3.speedLimit && (dX > _this3.speedLimit || dY > _this3.speedLimit)) {
+                        _x2 = _this3.viewport.x;
+                        _y = _this3.viewport.y;
+                        _this3._timer = setTimeout(onTimeout, _this3.refreshRate);
                         return;
                     }
 
-                    _this2._timer = null;
-                    if (_this2.hasChanged()) _this2.render();
+                    _this3._timer = null;
+                    if (_this3.hasChanged()) _this3.render();
                 };
 
                 this._timer = setTimeout(onTimeout, this.refreshRate);
@@ -4131,6 +4049,11 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
     }, {
         key: "render",
         value: function render() {
+            if (!this.viewport) {
+                var v = this.grid.viewport.getViewPort();
+                this.setViewPort(v.left, v.top, v.width, v.height);
+            }
+
             var rowRange = this.getRowRange(this.viewport.y, this.viewport.y + this.viewport.height),
                 columnRange = this.getColumnRange(this.viewport.x, this.viewport.x + this.viewport.width),
                 rowPos = 0,
@@ -4277,11 +4200,11 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.DataModel = undefined;
+exports.MetaData = exports.DataModel = undefined;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _MetaData = __webpack_require__(91);
 
 var _util = __webpack_require__(63);
 
@@ -4313,9 +4236,9 @@ var DataModel = exports.DataModel = function () {
         this.data = null;
         this.pk = pk;
 
-        this.rowData = new _MetaData.MetaData();
-        this.cellData = new _MetaData.MetaData();
-        this.columnData = new _MetaData.MetaData();
+        this.rowData = new MetaData();
+        this.cellData = new MetaData();
+        this.columnData = new MetaData();
 
         if (data) this.setData(data);
         if (columns) this.setColumns(columns);
@@ -4783,6 +4706,77 @@ DataModel.Column = Column;
 DataModel.Cell = Cell;
 DataModel.Row = Row;
 
+var MetaData = exports.MetaData = function () {
+    function MetaData(metadata) {
+        _classCallCheck(this, MetaData);
+
+        this.data = {};
+        this.dataCache = {};
+
+        if (metadata) this.setMetaData(metadata);
+    }
+
+    _createClass(MetaData, [{
+        key: "clear",
+        value: function clear() {
+            this.data = {};
+            this.dataCache = {};
+        }
+    }, {
+        key: "set",
+        value: function set(index, key, value) {
+            if (!this.data[index]) {
+                this.data[index] = {};
+            }
+
+            if (arguments.length === 2 && (typeof key === "undefined" ? "undefined" : _typeof(key)) === "object") {
+                Object.assign(this.data[index], key);
+            } else {
+                this.data[index][key] = value;
+            }
+        }
+    }, {
+        key: "get",
+        value: function get(index, key) {
+            if (this.data[index]) {
+                return arguments.length > 1 ? this.data[index][key] : this.data[index];
+            }
+        }
+    }, {
+        key: "remove",
+        value: function remove(index, key) {
+            if (this.data[index]) {
+                delete this.data[index][key];
+            }
+        }
+    }, {
+        key: "cache",
+        value: function cache(index, key, value) {
+            if (arguments.length === 1) {
+                return this.dataCache[index];
+            } else if (arguments.length === 2) {
+                return this.dataCache[index] ? this.dataCache[index][key] : undefined;
+            } else if (arguments.length === 3) {
+                if (value === undefined) {
+                    if (this.dataCache[index]) {
+                        delete this.dataCache[index][key];
+                    }
+                } else {
+                    if (!this.dataCache[index]) {
+                        this.dataCache[index] = {};
+                    }
+
+                    this.dataCache[index][key] = value;
+                }
+            }
+        }
+    }]);
+
+    return MetaData;
+}();
+
+DataModel.MetaData = MetaData;
+
 /***/ }),
 /* 130 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -4889,43 +4883,18 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var ViewPort = exports.ViewPort = function () {
-    function ViewPort() {
-        var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref$increment = _ref.increment,
-            increment = _ref$increment === undefined ? 400 : _ref$increment,
-            _ref$verticalPadding = _ref.verticalPadding,
-            verticalPadding = _ref$verticalPadding === undefined ? 1000 : _ref$verticalPadding,
-            _ref$horizontalPaddin = _ref.horizontalPadding,
-            horizontalPadding = _ref$horizontalPaddin === undefined ? 1000 : _ref$horizontalPaddin,
-            _ref$speedLimit = _ref.speedLimit,
-            speedLimit = _ref$speedLimit === undefined ? 1000 : _ref$speedLimit,
-            _ref$refreshRate = _ref.refreshRate,
-            refreshRate = _ref$refreshRate === undefined ? 100 : _ref$refreshRate,
-            _ref$grid = _ref.grid,
-            grid = _ref$grid === undefined ? null : _ref$grid,
-            _ref$canvas = _ref.canvas,
-            canvas = _ref$canvas === undefined ? null : _ref$canvas;
-
+    function ViewPort(grid) {
         _classCallCheck(this, ViewPort);
 
         this.viewport = $("<div class='grid-viewport'>");
 
         if (grid) this.setGrid(grid);
-        if (canvas) this.setCanvas(canvas);
 
         this._onScroll = this.onScroll.bind(this);
         this.viewport.on("scroll", this._onScroll);
 
-        this.increment = increment;
-        this.verticalPadding = verticalPadding;
-        this.horizontalPadding = horizontalPadding;
-        this.speedLimit = speedLimit;
-        this.refreshRate = refreshRate;
-
         this._left = 0;
         this._top = 0;
-        this._incrementX = 0;
-        this._incrementY = 0;
     }
 
     _createClass(ViewPort, [{
@@ -4934,20 +4903,14 @@ var ViewPort = exports.ViewPort = function () {
             this.viewport.appendTo(element);
         }
     }, {
+        key: "append",
+        value: function append(widget) {
+            widget.appendTo(this.viewport);
+        }
+    }, {
         key: "setGrid",
         value: function setGrid(grid) {
             this.grid = grid;
-        }
-    }, {
-        key: "setCanvas",
-        value: function setCanvas(canvas) {
-            this.canvas = canvas;
-            canvas.appendTo(this.viewport);
-
-            var width = this.viewport.innerWidth(),
-                height = this.viewport.innerHeight();
-
-            this.canvas.setViewPort(this._left - this.horizontalPadding, this._top - this.verticalPadding, width + this.horizontalPadding * 2, height + this.verticalPadding * 2);
         }
     }, {
         key: "onScroll",
@@ -4955,9 +4918,7 @@ var ViewPort = exports.ViewPort = function () {
             this._left = this.viewport.scrollLeft();
             this._top = this.viewport.scrollTop();
 
-            this.canvas.setViewPort(this._left, this._top, this.viewport.innerWidth(), this.viewport.innerHeight());
-
-            if (this.grid) this.grid.publish("scroll", this._left, this._top);
+            if (this.grid) this.grid.publish("scroll", this.getViewPort());
         }
     }, {
         key: "scrollLeft",
@@ -4968,6 +4929,16 @@ var ViewPort = exports.ViewPort = function () {
         key: "scrollTop",
         value: function scrollTop() {
             return this.viewport.scrollTop();
+        }
+    }, {
+        key: "getViewPort",
+        value: function getViewPort() {
+            return {
+                left: this._left,
+                top: this._top,
+                width: this.viewport.innerWidth(),
+                height: this.viewport.innerHeight()
+            };
         }
     }]);
 
