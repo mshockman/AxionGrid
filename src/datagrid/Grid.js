@@ -1,16 +1,6 @@
-import {DataModel} from "./DataView";
-import * as util from "./util";
-import {MetaData} from "./MetaData";
-import {GridDivCanvas} from "./Canvas";
-import {ViewPort} from "./ViewPort";
-import {CheckboxColumn} from "./Columns";
-import {GridHeader, ColumnRow} from "./Header";
-import {InlineFilterBar, TextFilter} from "./InlineFilters";
-
-import {publisher} from "./Publisher";
 
 
-class BaseGrid {
+export class BaseGrid {
     constructor(model, viewport, canvas) {
         this.viewport = viewport;
         this.model = model;
@@ -22,11 +12,11 @@ class BaseGrid {
     }
 
     setColumns(columns) {
-
+        this.model.setColumns(columns);
     }
 
     setData(data) {
-
+        this.model.setData(data);
     }
 
     render() {
@@ -68,19 +58,3 @@ class BaseGrid {
 }
 
 
-Object.assign(BaseGrid.prototype, publisher);
-
-
-export {
-    DataModel,
-    util,
-    MetaData,
-    GridDivCanvas,
-    ViewPort,
-    CheckboxColumn,
-    BaseGrid,
-    GridHeader,
-    ColumnRow,
-    InlineFilterBar,
-    TextFilter,
-};

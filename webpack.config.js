@@ -1,6 +1,6 @@
 module.exports = [
     {
-        entry: ["babel-polyfill", "./datagrid/Grid.js"],
+        entry: ["babel-polyfill", "./src/datagrid"],
 
         devtool: "source-map",
 

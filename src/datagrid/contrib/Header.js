@@ -1,8 +1,5 @@
 
 
-import {clamp} from "./util";
-
-
 export class GridHeader {
     constructor() {
         this.view = $("<div class='grid-header'>");
