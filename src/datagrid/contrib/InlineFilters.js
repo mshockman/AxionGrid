@@ -19,7 +19,10 @@ export class InlineFilterBar {
     setGrid(grid) {
         this.grid = grid;
 
-        this.grid.subscribe("render", this._render);
+        this.grid.subscribe("render", (target) => {
+            if(target === this.grid.canvas) this.render();
+        });
+
         this.grid.subscribe("resizing", this._render);
     }
 

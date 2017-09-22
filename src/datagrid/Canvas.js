@@ -86,7 +86,7 @@ export class GridDivCanvas {
                 }
 
                 this._timer = null;
-                if(this.hasChanged()) this.render();
+                if(this.hasChanged()) this.render("scroll");
             };
 
             this._timer = setTimeout(onTimeout, this.refreshRate);
@@ -100,7 +100,7 @@ export class GridDivCanvas {
             this.viewport.incrementY !== this._viewport.incrementY;
     }
 
-    render() {
+    render(type) {
         if(!this.viewport) {
             let v = this.grid.viewport.getViewPort();
             this.setViewPort(v.left, v.top, v.width, v.height);
@@ -171,7 +171,7 @@ export class GridDivCanvas {
         this.canvas.empty();
         this.canvas.append(frag);
 
-        if(this.grid) this.grid.publish("render");
+        if(this.grid) this.grid.publish("render", this, type);
     }
 
     appendTo(element) {

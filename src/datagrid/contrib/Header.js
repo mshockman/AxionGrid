@@ -38,7 +38,6 @@ export class GridHeader {
 
 export class ColumnRow {
     constructor(grid, sortable=true, resizeable=true) {
-        this.grid = grid;
         this.sortable = sortable;
 
         this.view = $("<div class='grid-column-row'>").css({
@@ -56,6 +55,18 @@ export class ColumnRow {
         if(this.sortable) {
             this.initSorting();
         }
+
+        if(grid) this.setGrid(grid);
+    }
+
+    setGrid(grid) {
+        this.grid = grid;
+
+        this.grid.subscribe("render", (target, type) => {
+            if(target === this.grid.canvas && type !== "scroll") {
+                this.render();
+            }
+        });
     }
 
     initSorting() {

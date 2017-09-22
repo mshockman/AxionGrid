@@ -4035,7 +4035,7 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
                     }
 
                     _this3._timer = null;
-                    if (_this3.hasChanged()) _this3.render();
+                    if (_this3.hasChanged()) _this3.render("scroll");
                 };
 
                 this._timer = setTimeout(onTimeout, this.refreshRate);
@@ -4048,7 +4048,7 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
         }
     }, {
         key: "render",
-        value: function render() {
+        value: function render(type) {
             if (!this.viewport) {
                 var v = this.grid.viewport.getViewPort();
                 this.setViewPort(v.left, v.top, v.width, v.height);
@@ -4119,7 +4119,7 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
             this.canvas.empty();
             this.canvas.append(frag);
 
-            if (this.grid) this.grid.publish("render");
+            if (this.grid) this.grid.publish("render", this, type);
         }
     }, {
         key: "appendTo",
@@ -4809,11 +4809,13 @@ var BaseGrid = exports.BaseGrid = function () {
         key: "setColumns",
         value: function setColumns(columns) {
             this.model.setColumns(columns);
+            this.publish("data-change", "columns");
         }
     }, {
         key: "setData",
         value: function setData(data) {
             this.model.setData(data);
+            this.publish("data-change", "data");
         }
     }, {
         key: "render",
@@ -5077,7 +5079,6 @@ var ColumnRow = exports.ColumnRow = function () {
 
         _classCallCheck(this, ColumnRow);
 
-        this.grid = grid;
         this.sortable = sortable;
 
         this.view = $("<div class='grid-column-row'>").css({
@@ -5095,19 +5096,34 @@ var ColumnRow = exports.ColumnRow = function () {
         if (this.sortable) {
             this.initSorting();
         }
+
+        if (grid) this.setGrid(grid);
     }
 
     _createClass(ColumnRow, [{
+        key: "setGrid",
+        value: function setGrid(grid) {
+            var _this2 = this;
+
+            this.grid = grid;
+
+            this.grid.subscribe("render", function (target, type) {
+                if (target === _this2.grid.canvas && type !== "scroll") {
+                    _this2.render();
+                }
+            });
+        }
+    }, {
         key: "initSorting",
         value: function initSorting() {
-            var _this2 = this;
+            var _this3 = this;
 
             this.view.sortable({
                 axis: "x",
                 cancel: "input,textarea,button,select,option,.ui-resize-handle",
 
                 update: function update(event, ui) {
-                    _this2.applySort();
+                    _this3.applySort();
                 }
             });
         }
@@ -5176,7 +5192,7 @@ var ColumnRow = exports.ColumnRow = function () {
     }, {
         key: "startResize",
         value: function startResize(event) {
-            var _this3 = this;
+            var _this4 = this;
 
             var $eventTarget = $(event.target),
                 handle = $eventTarget.closest(".ui-resize-handle", this.view),
@@ -5192,20 +5208,20 @@ var ColumnRow = exports.ColumnRow = function () {
                 column = this.model.getColumn($column.data("columnNumber"));
 
             var onMouseMove = function onMouseMove(event) {
-                _this3._modColumnWidths(originalWidths, column, event.clientX - startX);
+                _this4._modColumnWidths(originalWidths, column, event.clientX - startX);
                 event.preventDefault();
-                _this3.refresh(false);
-                _this3.grid.publish("resizing");
+                _this4.refresh(false);
+                _this4.grid.publish("resizing");
             };
 
             var onMouseUp = function onMouseUp(event) {
                 $doc.off("mousemove", onMouseMove);
                 $doc.off("mouseup", onMouseUp);
 
-                _this3._modColumnWidths(originalWidths, column, event.clientX - startX);
-                _this3.refresh(true);
-                _this3.grid.render();
-                _this3.grid.publish("refresh");
+                _this4._modColumnWidths(originalWidths, column, event.clientX - startX);
+                _this4.refresh(true);
+                _this4.grid.render();
+                _this4.grid.publish("refresh");
             };
 
             $doc.on("mousemove", onMouseMove);
@@ -5235,7 +5251,7 @@ var ColumnRow = exports.ColumnRow = function () {
     }, {
         key: "refresh",
         value: function refresh() {
-            var _this4 = this;
+            var _this5 = this;
 
             var updateViewWidth = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 
@@ -5247,7 +5263,7 @@ var ColumnRow = exports.ColumnRow = function () {
 
             $columns.each(function (index, element) {
                 var $column = $(element),
-                    column = _this4.model.getColumn($column.data("columnNumber")),
+                    column = _this5.model.getColumn($column.data("columnNumber")),
                     width = column.getWidth();
 
                 $column.css({
@@ -5258,7 +5274,7 @@ var ColumnRow = exports.ColumnRow = function () {
     }, {
         key: "applySort",
         value: function applySort() {
-            var _this5 = this;
+            var _this6 = this;
 
             var $columns = this.view.find(".grid-column"),
                 definitions = [],
@@ -5266,7 +5282,7 @@ var ColumnRow = exports.ColumnRow = function () {
 
             $columns.each(function (index, element) {
                 var $column = $(element),
-                    column = _this5.model.getColumn($column.data("columnNumber"));
+                    column = _this6.model.getColumn($column.data("columnNumber"));
 
                 $column.data("columnNumber", i++);
 
@@ -5324,9 +5340,14 @@ var InlineFilterBar = exports.InlineFilterBar = function () {
     _createClass(InlineFilterBar, [{
         key: "setGrid",
         value: function setGrid(grid) {
+            var _this = this;
+
             this.grid = grid;
 
-            this.grid.subscribe("render", this._render);
+            this.grid.subscribe("render", function (target) {
+                if (target === _this.grid.canvas) _this.render();
+            });
+
             this.grid.subscribe("resizing", this._render);
         }
     }, {
