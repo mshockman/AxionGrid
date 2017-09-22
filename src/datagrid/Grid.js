@@ -13,10 +13,12 @@ export class BaseGrid {
 
     setColumns(columns) {
         this.model.setColumns(columns);
+        this.publish("data-change", "columns");
     }
 
     setData(data) {
         this.model.setData(data);
+        this.publish("data-change", "data");
     }
 
     render() {
