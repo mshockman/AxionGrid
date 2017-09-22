@@ -4917,8 +4917,6 @@ var StandardGrid = exports.StandardGrid = function (_BaseGrid) {
 
         _this.header.appendTo(_this.container);
         _this.viewport.appendTo(_this.container);
-
-        _this.render();
         return _this;
     }
 

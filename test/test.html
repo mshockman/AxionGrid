@@ -192,6 +192,11 @@
             maxWidth: 400,
             minWidth: 30
         });
+
+        var filterBar = new grid.InlineFilterBar(g);
+        g.header.append(filterBar);
+
+        g.render();
     </script>
 
     <br><br><h3>Test</h3>

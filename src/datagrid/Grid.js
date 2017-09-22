@@ -88,7 +88,5 @@ export class StandardGrid extends BaseGrid {
 
         this.header.appendTo(this.container);
         this.viewport.appendTo(this.container);
-
-        this.render();
     }
 }
