@@ -2,7 +2,7 @@ import {clamp, coordinateString} from "./util";
 
 
 export class DataModel {
-    constructor({data, columns, rowHeight=25, defaultColumnWidth=100, minWidth=null, maxWidth=null, grid=null, pk=null}) {
+    constructor({data=null, columns=null, rowHeight=25, defaultColumnWidth=100, minWidth=null, maxWidth=null, grid=null, pk=null}={}) {
         this.rowHeight = rowHeight;
         this.defaultColumnWidth = defaultColumnWidth;
         this.minWidth = minWidth;

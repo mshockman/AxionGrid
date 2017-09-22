@@ -7,7 +7,7 @@ import {CheckboxColumn} from "./contrib/CheckboxColumn";
 import {GridHeader, ColumnRow} from "./contrib/Header";
 import {InlineFilterBar, TextFilter} from "./contrib/InlineFilters";
 
-import {BaseGrid} from './Grid';
+import {BaseGrid, StandardGrid} from './Grid';
 
 
 export {
@@ -21,4 +21,5 @@ export {
     ColumnRow,
     InlineFilterBar,
     TextFilter,
+    StandardGrid,
 };

@@ -3850,7 +3850,7 @@ if (fails(function () { return new $WeakMap().set((Object.freeze || Object)(tmp)
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.TextFilter = exports.InlineFilterBar = exports.ColumnRow = exports.GridHeader = exports.BaseGrid = exports.CheckboxColumn = exports.ViewPort = exports.GridDivCanvas = exports.util = exports.DataModel = undefined;
+exports.StandardGrid = exports.TextFilter = exports.InlineFilterBar = exports.ColumnRow = exports.GridHeader = exports.BaseGrid = exports.CheckboxColumn = exports.ViewPort = exports.GridDivCanvas = exports.util = exports.DataModel = undefined;
 
 var _DataView = __webpack_require__(129);
 
@@ -3882,6 +3882,7 @@ exports.GridHeader = _Header.GridHeader;
 exports.ColumnRow = _Header.ColumnRow;
 exports.InlineFilterBar = _InlineFilters.InlineFilterBar;
 exports.TextFilter = _InlineFilters.TextFilter;
+exports.StandardGrid = _Grid.StandardGrid;
 
 /***/ }),
 /* 127 */
@@ -3941,10 +3942,12 @@ var _util = __webpack_require__(63);
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var GridDivCanvas = exports.GridDivCanvas = function () {
-    function GridDivCanvas(grid) {
+    function GridDivCanvas() {
         var _this = this;
 
-        var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+        var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            _ref$grid = _ref.grid,
+            grid = _ref$grid === undefined ? null : _ref$grid,
             _ref$cropColumns = _ref.cropColumns,
             cropColumns = _ref$cropColumns === undefined ? false : _ref$cropColumns,
             _ref$refreshRate = _ref.refreshRate,
@@ -4211,9 +4214,12 @@ var _util = __webpack_require__(63);
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var DataModel = exports.DataModel = function () {
-    function DataModel(_ref) {
-        var data = _ref.data,
-            columns = _ref.columns,
+    function DataModel() {
+        var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            _ref$data = _ref.data,
+            data = _ref$data === undefined ? null : _ref$data,
+            _ref$columns = _ref.columns,
+            columns = _ref$columns === undefined ? null : _ref$columns,
             _ref$rowHeight = _ref.rowHeight,
             rowHeight = _ref$rowHeight === undefined ? 25 : _ref$rowHeight,
             _ref$defaultColumnWid = _ref.defaultColumnWidth,
@@ -4787,8 +4793,21 @@ DataModel.MetaData = MetaData;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.StandardGrid = exports.BaseGrid = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _DataView = __webpack_require__(129);
+
+var _Canvas = __webpack_require__(128);
+
+var _ViewPort = __webpack_require__(131);
+
+var _Header = __webpack_require__(133);
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -4806,24 +4825,24 @@ var BaseGrid = exports.BaseGrid = function () {
     }
 
     _createClass(BaseGrid, [{
-        key: "setColumns",
+        key: 'setColumns',
         value: function setColumns(columns) {
             this.model.setColumns(columns);
             this.publish("data-change", "columns");
         }
     }, {
-        key: "setData",
+        key: 'setData',
         value: function setData(data) {
             this.model.setData(data);
             this.publish("data-change", "data");
         }
     }, {
-        key: "render",
+        key: 'render',
         value: function render() {
             this.canvas.render();
         }
     }, {
-        key: "subscribe",
+        key: 'subscribe',
         value: function subscribe(topic, callback) {
             if (!this._subscriptions) {
                 this._subscriptions = {};
@@ -4836,7 +4855,7 @@ var BaseGrid = exports.BaseGrid = function () {
             this._subscriptions[topic].push(callback);
         }
     }, {
-        key: "publish",
+        key: 'publish',
         value: function publish(topic) {
             if (this._subscriptions && this._subscriptions[topic]) {
                 for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -4853,7 +4872,7 @@ var BaseGrid = exports.BaseGrid = function () {
             }
         }
     }, {
-        key: "unsubscribe",
+        key: 'unsubscribe',
         value: function unsubscribe(topic, callback) {
             if (this._subscriptions && this._subscriptions[topic]) {
                 var i = this._subscriptions[topic].indexOf(callback);
@@ -4868,6 +4887,43 @@ var BaseGrid = exports.BaseGrid = function () {
 
     return BaseGrid;
 }();
+
+var StandardGrid = exports.StandardGrid = function (_BaseGrid) {
+    _inherits(StandardGrid, _BaseGrid);
+
+    function StandardGrid(container, data, columns) {
+        var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+
+        _classCallCheck(this, StandardGrid);
+
+        var model = new _DataView.DataModel(options),
+            canvas = new _Canvas.GridDivCanvas(options),
+            viewport = new _ViewPort.ViewPort();
+
+        viewport.append(canvas);
+
+        var _this = _possibleConstructorReturn(this, (StandardGrid.__proto__ || Object.getPrototypeOf(StandardGrid)).call(this, model, viewport, canvas));
+
+        if (data) _this.model.setData(data);
+        if (columns) _this.model.setColumns(columns);
+
+        _this.container = $(container);
+        _this.header = new _Header.GridHeader();
+        _this.columnRow = new _Header.ColumnRow();
+
+        _this.header.setGrid(_this);
+        _this.columnRow.setGrid(_this);
+        _this.header.append(_this.columnRow);
+
+        _this.header.appendTo(_this.container);
+        _this.viewport.appendTo(_this.container);
+
+        _this.render();
+        return _this;
+    }
+
+    return StandardGrid;
+}(BaseGrid);
 
 /***/ }),
 /* 131 */
@@ -5039,18 +5095,14 @@ var GridHeader = exports.GridHeader = function () {
     }
 
     _createClass(GridHeader, [{
-        key: "bindToViewPort",
-        value: function bindToViewPort(viewport) {
+        key: "setGrid",
+        value: function setGrid(grid) {
             var _this = this;
 
-            if (viewport.viewport) {
-                viewport = $(viewport.viewport);
-            } else {
-                viewport = $(viewport);
-            }
+            this.grid = grid;
 
-            viewport.on("scroll", function (event) {
-                _this.viewport.scrollLeft($(event.target).scrollLeft());
+            this.grid.subscribe("scroll", function (viewport) {
+                _this.viewport.scrollLeft(viewport.left);
             });
         }
     }, {

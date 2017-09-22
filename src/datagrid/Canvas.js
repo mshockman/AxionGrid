@@ -5,7 +5,7 @@
 import {clamp, dictsEqual} from "./util";
 
 export class GridDivCanvas {
-    constructor(grid, {cropColumns=false, refreshRate=100, incrementX=20, incrementY=250, verticalPadding=1000, horizontalPadding=1000, speedLimit=1000}={}) {
+    constructor({grid=null, cropColumns=false, refreshRate=100, incrementX=20, incrementY=250, verticalPadding=1000, horizontalPadding=1000, speedLimit=1000}={}) {
         this.cropColumns = cropColumns;
         this.refreshRate = refreshRate;
         this.incrementX = incrementX;

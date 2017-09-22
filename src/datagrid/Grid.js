@@ -1,3 +1,8 @@
+import {DataModel} from './DataView';
+import {GridDivCanvas} from './Canvas';
+import {ViewPort} from './ViewPort';
+
+import {GridHeader, ColumnRow} from './contrib/Header';
 
 
 export class BaseGrid {
@@ -60,3 +65,30 @@ export class BaseGrid {
 }
 
 
+export class StandardGrid extends BaseGrid {
+    constructor(container, data, columns, options={}) {
+        let model = new DataModel(options),
+            canvas = new GridDivCanvas(options),
+            viewport = new ViewPort()
+
+        viewport.append(canvas);
+
+        super(model, viewport, canvas);
+
+        if(data) this.model.setData(data);
+        if(columns) this.model.setColumns(columns);
+
+        this.container = $(container);
+        this.header = new GridHeader();
+        this.columnRow = new ColumnRow();
+
+        this.header.setGrid(this);
+        this.columnRow.setGrid(this);
+        this.header.append(this.columnRow);
+
+        this.header.appendTo(this.container);
+        this.viewport.appendTo(this.container);
+
+        this.render();
+    }
+}

@@ -166,27 +166,32 @@
             }
         ];
 
-        var model = new grid.DataModel({data: data, columns: columns, maxWidth: 400, minWidth: 30});
-        var canvas = new grid.GridDivCanvas(null, {cropColumns: false});
-        var viewport = new grid.ViewPort();
+//        var model = new grid.DataModel({data: data, columns: columns, maxWidth: 400, minWidth: 30});
+//        var canvas = new grid.GridDivCanvas(null, {cropColumns: false});
+//        var viewport = new grid.ViewPort();
+//
+//
+//
+//        var g = new grid.BaseGrid(model, viewport, canvas);
+//
+//        var header = new grid.GridHeader();
+//        var columnRow = new grid.ColumnRow(g);
+//        var filterRow = new grid.InlineFilterBar(g);
+//
+//        header.setGrid(g);
+//        header.append(columnRow);
+//        header.append(filterRow);
+//        header.appendTo("#container");
+//
+//        viewport.append(canvas);
+//        viewport.appendTo("#container");
+//
+//        g.render();
 
-
-
-        var g = new grid.BaseGrid(model, viewport, canvas);
-
-        var header = new grid.GridHeader();
-        var columnRow = new grid.ColumnRow(g);
-        var filterRow = new grid.InlineFilterBar(g);
-
-        header.append(columnRow);
-        header.append(filterRow);
-        header.appendTo("#container");
-
-        viewport.append(canvas);
-        viewport.appendTo("#container");
-
-        header.bindToViewPort(viewport);
-        g.render();
+        var g = new grid.StandardGrid("#container", data, columns, {
+            maxWidth: 400,
+            minWidth: 30
+        });
     </script>
 
     <br><br><h3>Test</h3>

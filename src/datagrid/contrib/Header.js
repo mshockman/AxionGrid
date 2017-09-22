@@ -10,15 +10,11 @@ export class GridHeader {
         this.view.append(this.viewport);
     }
 
-    bindToViewPort(viewport) {
-        if(viewport.viewport) {
-            viewport = $(viewport.viewport);
-        } else {
-            viewport = $(viewport);
-        }
+    setGrid(grid) {
+        this.grid = grid;
 
-        viewport.on("scroll", (event) => {
-            this.viewport.scrollLeft($(event.target).scrollLeft());
+        this.grid.subscribe("scroll", (viewport) => {
+            this.viewport.scrollLeft(viewport.left);
         });
     }
 
