@@ -33,8 +33,11 @@ export class GridHeader {
 
 
 export class ColumnRow {
-    constructor(grid, sortable=true, resizeable=true) {
-        this.sortable = sortable;
+    constructor(grid, draggable=true, resizeable=true, dataSortable=false) {
+        this.draggable = draggable;
+        this.dataSortable = dataSortable;
+        this.sortingStates = ["sort-none", "sort-asc", "sort-desc"];
+        this.sortingStateValues = ["", "asc", "desc"];
 
         this.view = $("<div class='grid-column-row'>").css({
             position: "relative",
@@ -48,7 +51,11 @@ export class ColumnRow {
             this.view.on("mousedown", this._startResize);
         }
 
-        if(this.sortable) {
+        if(this.draggable) {
+            this.initColumnDragAndDrop();
+        }
+
+        if(this.dataSortable) {
             this.initSorting();
         }
 
@@ -65,13 +72,42 @@ export class ColumnRow {
         });
     }
 
-    initSorting() {
+    initColumnDragAndDrop() {
         this.view.sortable({
             axis: "x",
             cancel: "input,textarea,button,select,option,.ui-resize-handle",
 
             update: (event, ui) => {
                 this.applySort();
+            }
+        });
+    }
+
+    initSorting() {
+        this.sortState = 0;
+        this.view.find(".grid-column").addClass(this.sortingStates[this.sortState]);
+
+        this.view.on("click", (event) => {
+            let $column = $(event.target).closest(".grid-column", this.view);
+
+            if(!$column.length) {
+                return;
+            }
+
+            let column = this.grid.model.getColumn($column.data('columnNumber'));
+
+            $column.removeClass(this.sortingStates[this.sortState]);
+            this.sortState++;
+
+            if(this.sortState > 2) {
+                this.sortState = 0;
+            }
+
+            $column.addClass(this.sortingStates[this.sortState]);
+            if(column) column.setMetaData("dataSort", this.sortingStateValues[this.sortState]);
+
+            if(this.grid) {
+                this.grid.publish("dataSortChange", column);
             }
         });
     }
@@ -93,8 +129,12 @@ export class ColumnRow {
                 name = column.getLabel(),
                 width = column.getWidth();
 
-            if(this.sortable && column.getMetaData("sortable")) {
+            if(this.draggable && column.getMetaData("sortable")) {
                 $column.addClass("ui-sortable");
+            }
+
+            if(this.dataSortable && column.getMetaData("dataSortable")) {
+                $column.addClass(this.sortingStates[0]);
             }
 
             $column.addClass(column.getClasses());

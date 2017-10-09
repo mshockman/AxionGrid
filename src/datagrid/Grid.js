@@ -69,7 +69,7 @@ export class StandardGrid extends BaseGrid {
     constructor(container, data, columns, options={}) {
         let model = new DataModel(options),
             canvas = new GridDivCanvas(options),
-            viewport = new ViewPort()
+            viewport = new ViewPort();
 
         viewport.append(canvas);
 
