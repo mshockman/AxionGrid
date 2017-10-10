@@ -4034,6 +4034,21 @@ var DataModel = exports.DataModel = function () {
         value: function getHeight() {
             return this.getDataLength() * this.rowHeight;
         }
+    }, {
+        key: "findRows",
+        value: function findRows(param, value) {
+            var r = [];
+
+            for (var i = 0, l = this.getDataLength(); i < l; i++) {
+                var row = this.getRow(i);
+
+                if (row.getMetaData(param) === value) {
+                    r.push(row);
+                }
+            }
+
+            return r;
+        }
     }]);
 
     return DataModel;

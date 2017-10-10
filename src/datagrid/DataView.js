@@ -138,6 +138,20 @@ export class DataModel {
     getHeight() {
         return this.getDataLength()*this.rowHeight;
     }
+
+    findRows(param, value) {
+        let r = [];
+
+        for(let i = 0, l = this.getDataLength(); i < l; i++) {
+            let row = this.getRow(i);
+
+            if(row.getMetaData(param) === value) {
+                r.push(row);
+            }
+        }
+
+        return r;
+    }
 }
 
 
