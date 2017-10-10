@@ -80,7 +80,7 @@ export class StandardGrid extends BaseGrid {
 
         this.container = $(container);
         this.header = new GridHeader();
-        this.columnRow = new ColumnRow();
+        this.columnRow = new ColumnRow(null, options);
 
         this.header.setGrid(this);
         this.columnRow.setGrid(this);

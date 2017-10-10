@@ -98,6 +98,14 @@
             box-sizing: border-box;
             vertical-align: top;
         }
+
+        .sort-asc {
+            background-color: #f00;
+        }
+
+        .sort-desc {
+            background-color: #00f;
+        }
     </style>
 </head>
 <body>
@@ -195,13 +203,21 @@
 
         var g = new grid.StandardGrid("#container", data, columns, {
             maxWidth: 400,
-            minWidth: 30
+            minWidth: 30,
+            dataSortable: true
         });
 
         var filterBar = new grid.InlineFilterBar(g);
         g.header.append(filterBar);
 
         g.render();
+
+        g.subscribe("dataSortChange", function(state, column) {
+            window.c = column;
+            console.dir(column);
+            console.log(state);
+            g.render();
+        });
     </script>
 
     <br><br><h3>Test</h3>

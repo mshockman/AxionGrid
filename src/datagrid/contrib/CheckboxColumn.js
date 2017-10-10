@@ -10,8 +10,6 @@ export class CheckboxColumn {
             let val = label.is(":checked"),
                 grid = $(event.target).closest(".grid-column").data("grid");
 
-            console.log("OK");
-
             for(let i = 0, l = grid.model.getDataLength(); i < l; i++) {
                 let row = grid.model.getRow(i);
                 row.setMetaData(name, val);

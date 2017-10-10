@@ -4852,16 +4852,25 @@ var GridHeader = exports.GridHeader = function () {
 
 var ColumnRow = exports.ColumnRow = function () {
     function ColumnRow(grid) {
-        var draggable = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-        var resizeable = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-        var dataSortable = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+        var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+            _ref$draggable = _ref.draggable,
+            draggable = _ref$draggable === undefined ? true : _ref$draggable,
+            _ref$resizeable = _ref.resizeable,
+            resizeable = _ref$resizeable === undefined ? true : _ref$resizeable,
+            _ref$dataSortable = _ref.dataSortable,
+            dataSortable = _ref$dataSortable === undefined ? false : _ref$dataSortable;
 
         _classCallCheck(this, ColumnRow);
 
         this.draggable = draggable;
         this.dataSortable = dataSortable;
         this.sortingStates = ["sort-none", "sort-asc", "sort-desc"];
-        this.sortingStateValues = ["", "asc", "desc"];
+
+        this.sortMap = {
+            "sort-none": null,
+            "sort-asc": "asc",
+            "sort-desc": "desc"
+        };
 
         this.view = $("<div class='grid-column-row'>").css({
             position: "relative",
@@ -4918,8 +4927,7 @@ var ColumnRow = exports.ColumnRow = function () {
         value: function initSorting() {
             var _this4 = this;
 
-            this.sortState = 0;
-            this.view.find(".grid-column").addClass(this.sortingStates[this.sortState]);
+            this.view.find(".grid-column").addClass(this.sortingStates[0]);
 
             this.view.on("click", function (event) {
                 var $column = $(event.target).closest(".grid-column", _this4.view);
@@ -4928,20 +4936,25 @@ var ColumnRow = exports.ColumnRow = function () {
                     return;
                 }
 
-                var column = _this4.grid.model.getColumn($column.data('columnNumber'));
+                var column = _this4.grid.model.getColumn($column.data('columnNumber')),
+                    sortState = column.getMetaData("dataSort") || 0;
 
-                $column.removeClass(_this4.sortingStates[_this4.sortState]);
-                _this4.sortState++;
-
-                if (_this4.sortState > 2) {
-                    _this4.sortState = 0;
+                if (!column.getMetaData("dataSortable")) {
+                    return;
                 }
 
-                $column.addClass(_this4.sortingStates[_this4.sortState]);
-                if (column) column.setMetaData("dataSort", _this4.sortingStateValues[_this4.sortState]);
+                $column.removeClass(_this4.sortingStates[sortState]);
+                sortState++;
+
+                if (sortState > 2) {
+                    sortState = 0;
+                }
+
+                $column.addClass(_this4.sortingStates[sortState]);
+                column.setMetaData("dataSort", sortState);
 
                 if (_this4.grid) {
-                    _this4.grid.publish("dataSortChange", column);
+                    _this4.grid.publish("dataSortChange", _this4.sortMap[_this4.sortingStates[sortState]], column);
                 }
             });
         }
@@ -4965,7 +4978,7 @@ var ColumnRow = exports.ColumnRow = function () {
                 }
 
                 if (this.dataSortable && column.getMetaData("dataSortable")) {
-                    $column.addClass(this.sortingStates[0]);
+                    $column.addClass(this.sortingStates[column.getMetaData("dataSort") || 0]);
                 }
 
                 $column.addClass(column.getClasses());
@@ -10510,8 +10523,6 @@ var CheckboxColumn = exports.CheckboxColumn = function CheckboxColumn(name, opti
         var val = label.is(":checked"),
             grid = $(event.target).closest(".grid-column").data("grid");
 
-        console.log("OK");
-
         for (var i = 0, l = grid.model.getDataLength(); i < l; i++) {
             var row = grid.model.getRow(i);
             row.setMetaData(name, val);
@@ -10841,7 +10852,7 @@ var StandardGrid = exports.StandardGrid = function (_BaseGrid) {
 
         _this.container = $(container);
         _this.header = new _Header.GridHeader();
-        _this.columnRow = new _Header.ColumnRow();
+        _this.columnRow = new _Header.ColumnRow(null, options);
 
         _this.header.setGrid(_this);
         _this.columnRow.setGrid(_this);
