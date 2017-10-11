@@ -2,63 +2,36 @@ import {DataModel} from './DataView';
 import {GridDivCanvas} from './Canvas';
 
 import {GridHeader, ColumnRow} from './contrib/Header';
+import {Publisher} from "../common/events";
 
 
-export class BaseGrid {
+export class BaseGrid extends Publisher {
     constructor(model, canvas) {
+        super();
         this.model = model;
         this.canvas = canvas;
 
-        this.model.setGrid(this);
-        this.canvas.setGrid(this);
+        this.canvas.setDataModel(this.model);
+
+        this._captureEvent = (...args) => {
+            this.publish(...args);
+        };
+
+        this.model.subscribe("*", this._captureEvent);
+        this.canvas.subscribe("*", this._captureEvent);
     }
 
     setColumns(columns) {
         this.model.setColumns(columns);
-        this.publish("data-change", "columns");
     }
 
     setData(data) {
         this.model.setData(data);
-        this.publish("data-change", "data");
     }
 
     render() {
         this.canvas.render();
         this.publish("render", this);
-    }
-
-    subscribe(topic, callback) {
-        if(!this._subscriptions) {
-            this._subscriptions = {};
-        }
-
-        if(!this._subscriptions[topic]) {
-            this._subscriptions[topic] = [];
-        }
-
-        this._subscriptions[topic].push(callback);
-    }
-
-    publish(topic, ...args) {
-        if(this._subscriptions && this._subscriptions[topic]) {
-            for(let i = 0, l = this._subscriptions[topic].length; i < l; i++) {
-                if(this._subscriptions[topic][i](...args) === false) {
-                    break;
-                }
-            }
-        }
-    }
-
-    unsubscribe(topic, callback) {
-        if(this._subscriptions && this._subscriptions[topic]) {
-            let i = this._subscriptions[topic].indexOf(callback);
-
-            if(i !== -1) {
-                this._subscriptions[topic].splice(i, 1);
-                return callback;
-            }
-        }
     }
 }
 

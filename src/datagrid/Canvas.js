@@ -3,9 +3,11 @@
  * and passing events that happen to those element to the grid.
  */
 import {clamp} from "../common/util";
+import {Publisher} from "../common/events";
 
-export class GridDivCanvas {
-    constructor({grid=null, virtualization="row", refreshRate=100, incrementX=20, incrementY=250, verticalPadding=1000, horizontalPadding=1000, speedLimit=1000}={}) {
+export class GridDivCanvas extends Publisher {
+    constructor({model=null, virtualization="row", refreshRate=100, incrementX=20, incrementY=250, verticalPadding=1000, horizontalPadding=1000, speedLimit=1000}={}) {
+        super();
         this.virtualization = virtualization;
         this.refreshRate = refreshRate;
         this.incrementX = incrementX;
@@ -22,10 +24,6 @@ export class GridDivCanvas {
 
         this.canvas.appendTo(this.view);
 
-        if(grid) {
-            this.setGrid(grid);
-        }
-
         this.canvas.on("change click", (event) => {
             let $target = $(event.target),
                 $cell = $target.closest(".grid-cell", this.canvas),
@@ -41,14 +39,12 @@ export class GridDivCanvas {
 
         this._left = 0;
         this._top = 0;
+
+        if(model) this.setDataModel(model);
     }
 
-    get model() {
-        return this.grid.model;
-    }
-
-    setGrid(grid) {
-        this.grid = grid;
+    setDataModel(model) {
+        this.model = model;
     }
 
     setViewPort(x, y, width, height) {
@@ -233,7 +229,7 @@ export class GridDivCanvas {
 
         this.setViewPort(viewport.left, viewport.top, viewport.width, viewport.height);
 
-        if(this.grid) this.grid.publish("canvas-scroll", viewport);
+        this.publish("canvas-scroll", viewport);
     }
 
     setScroll(left, top) {
@@ -244,7 +240,7 @@ export class GridDivCanvas {
 
         this.setViewPort(viewport.left, viewport.top, viewport.width, viewport.height);
 
-        if(this.grid) this.grid.publish("canvas-scroll", viewport);
+        this.publish("canvas-scroll", viewport);
     }
 
     scrollLeft() {

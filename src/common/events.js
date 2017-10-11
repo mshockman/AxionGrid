@@ -17,6 +17,12 @@ export class Publisher {
      * @param callback
      */
     subscribe(topic, callback) {
+        // If only 1 argument is provided the topic is *.
+        if(arguments.length === 1) {
+            callback = topic;
+            topic = "*";
+        }
+
         // Sanity check.
         if(typeof callback !== "function") {
             throw new TypeError("Callback must be a function.");
@@ -36,6 +42,12 @@ export class Publisher {
      * @returns {*}
      */
     unsubscribe(topic, callback) {
+        // If only 1 argument is provided the topic is *.
+        if(arguments.length === 1) {
+            callback = topic;
+            topic = "*";
+        }
+
         if(this.topics[topic]) {
             let i = this.topics[topic].indexOf(callback);
 
@@ -53,6 +65,12 @@ export class Publisher {
      * @returns {boolean}
      */
     isSubscribed(topic, callback) {
+        // If only 1 argument is provided the topic is *.
+        if(arguments.length === 1) {
+            callback = topic;
+            topic = "*";
+        }
+
         return this.topics[topic] ? this.topics[topic].indexOf(callback) !== -1 : false;
     }
 
@@ -72,9 +90,21 @@ export class Publisher {
      * @param args
      */
     publish(topic, ...args) {
+        if(topic === "*") {
+            throw new Error("You cannot publish the global topic *.");
+        }
+
         if(this.topics[topic]) {
             for(let i = 0, l = this.topics[topic].length; i < l; i++) {
                 if(this.topics[topic][i](...args) === false) {
+                    break;
+                }
+            }
+        }
+
+        if(this.topics["*"]) {
+            for(let i = 0, l = this.topics["*"].length; i < l; i++) {
+                if(this.topics["*"][i](topic, ...args) === false) {
                     break;
                 }
             }

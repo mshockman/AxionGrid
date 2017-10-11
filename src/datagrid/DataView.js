@@ -1,9 +1,23 @@
 import {coordinateString} from "./util";
 import {clamp} from "../common/util";
+import {Publisher} from "../common/events";
 
 
-export class DataModel {
-    constructor({data=null, columns=null, rowHeight=25, defaultColumnWidth=100, minWidth=null, maxWidth=null, grid=null, pk=null}={}) {
+/**
+ * Model class that stores row, column and cell information.
+ *
+ * Extends Publisher class.
+ * topics
+ *     data-change
+ *          type
+ *              data - The data has changed.
+ *              column - The columns have changed.
+ *
+ *
+ */
+export class DataModel extends Publisher {
+    constructor({data=null, columns=null, rowHeight=25, defaultColumnWidth=100, minWidth=null, maxWidth=null, pk=null}={}) {
+        super();
         this.rowHeight = rowHeight;
         this.defaultColumnWidth = defaultColumnWidth;
         this.minWidth = minWidth;
@@ -17,11 +31,6 @@ export class DataModel {
 
         if(data) this.setData(data);
         if(columns) this.setColumns(columns);
-        if(grid) this.setGrid(grid);
-    }
-
-    setGrid(grid) {
-        this.grid = grid;
     }
 
     /**
@@ -33,7 +42,7 @@ export class DataModel {
         this.rowData.clear();
         this.cellData.clear();
         this.data = data;
-        if(this.grid) this.grid.publish("data-change", "data", this);
+        this.publish("data-change", "data", this);
     }
 
     /**
@@ -48,7 +57,7 @@ export class DataModel {
         }
 
         this.columnData.length = columns.length;
-        if(this.grid) this.grid.publish("data-change", "columns", this);
+        this.publish("data-change", "columns", this);
     }
 
     /**
@@ -83,6 +92,12 @@ export class DataModel {
         }
     }
 
+    /**
+     * Sets the data item value.
+     * @param index
+     * @param key
+     * @param value
+     */
     setDataItem(index, key, value) {
         if(this.data) {
             if(this.data.setDataItem) {
@@ -191,6 +206,10 @@ class Row {
     }
 
     getMetaData(key) {
+        if(arguments.length === 0) {
+            return this.model.rowData.get(this.rowNumber);
+        }
+
         return this.model.rowData.get(this.rowNumber, key);
     }
 
@@ -269,6 +288,10 @@ class Cell {
     }
 
     getMetaData(key) {
+        if(arguments.length === 0) {
+            return this.model.cellData.get(this.getIndex());
+        }
+
         return this.model.cellData.get(this.getIndex(), key);
     }
 
@@ -340,6 +363,10 @@ class Column {
     }
 
     getMetaData(key) {
+        if(arguments.length === 0) {
+            return this.model.columnData.get(this.columnNumber);
+        }
+
         return this.model.columnData.get(this.columnNumber, key);
     }
 
@@ -417,12 +444,19 @@ DataModel.Cell = Cell;
 DataModel.Row = Row;
 
 
+/**
+ * Class that stores MetaData for rows and columns.
+ */
 export class MetaData {
     constructor(metadata) {
         this.data = {};
         this.dataCache = {};
 
         if(metadata) this.setMetaData(metadata);
+    }
+
+    setMetaData(metadata) {
+        this.data = metadata;
     }
 
     clear() {
