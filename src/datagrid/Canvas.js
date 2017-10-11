@@ -5,8 +5,8 @@
 import {clamp, dictsEqual} from "./util";
 
 export class GridDivCanvas {
-    constructor({grid=null, cropColumns=false, refreshRate=100, incrementX=20, incrementY=250, verticalPadding=1000, horizontalPadding=1000, speedLimit=1000}={}) {
-        this.cropColumns = cropColumns;
+    constructor({grid=null, virtualization="row", refreshRate=100, incrementX=20, incrementY=250, verticalPadding=1000, horizontalPadding=1000, speedLimit=1000}={}) {
+        this.virtualization = virtualization;
         this.refreshRate = refreshRate;
         this.incrementX = incrementX;
         this.incrementY = incrementY;
@@ -57,7 +57,7 @@ export class GridDivCanvas {
             y: y - this.verticalPadding,
             width: width + (this.horizontalPadding*2),
             height: height + (this.verticalPadding*2),
-            incrementX: this.cropColumns ? Math.floor(x / this.incrementX) : 0,
+            incrementX: this.virtualization === "col" || this.virtualization === "both" ? Math.floor(x / this.incrementX) : 0,
             incrementY: Math.floor(y / this.incrementY)
         };
 
@@ -173,12 +173,19 @@ export class GridDivCanvas {
     }
 
     getRowRange(start, stop) {
-        let l = this.model.getDataLength();
+        if(this.virtualization === "both" || this.virtualization === "row") {
+            let l = this.model.getDataLength();
 
-        return {
-            start: clamp(Math.floor(start / this.model.rowHeight), 0, l),
-            stop: clamp(Math.floor(stop / this.model.rowHeight), 0, l)
-        };
+            return {
+                start: clamp(Math.floor(start / this.model.rowHeight), 0, l),
+                stop: clamp(Math.floor(stop / this.model.rowHeight), 0, l)
+            };
+        } else {
+            return {
+                start: 0,
+                stop: this.model.getDataLength()
+            };
+        }
     }
 
     getColumnRange(start, stop) {
@@ -191,7 +198,7 @@ export class GridDivCanvas {
         r.start = 0;
         r.stop = l;
 
-        if(!this.cropColumns) {
+        if(!(this.virtualization === "both" || this.virtualization === "col")) {
             return r;
         }
 
