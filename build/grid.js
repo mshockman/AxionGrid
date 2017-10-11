@@ -1849,16 +1849,10 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 exports.stringFromColumnIndex = stringFromColumnIndex;
 exports.stringToIndex = stringToIndex;
 exports.coordinateString = coordinateString;
 exports.fromCoordinateString = fromCoordinateString;
-exports.randomChoice = randomChoice;
-exports.clamp = clamp;
-exports.dictsEqual = dictsEqual;
 
 
 var reg_coord = /([A-Z]+)([0-9]+)/;
@@ -1924,58 +1918,6 @@ function fromCoordinateString(c) {
         y = reg[2];
 
     return [stringToIndex(x), parseInt(y, 10) - 1];
-}
-
-function randomChoice(array) {
-    var c = Math.floor(Math.random() * array.length);
-    return array[c];
-}
-
-/**
- *
- * @param value
- * @param min
- * @param max
- * @returns {*}
- */
-function clamp(value) {
-    var min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-    var max = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
-    if (min != null) {
-        value = Math.max(min, value);
-    }
-
-    if (max != null) {
-        value = Math.min(max, value);
-    }
-
-    return value;
-}
-
-function dictsEqual(object1, object2) {
-    if ((typeof object1 === "undefined" ? "undefined" : _typeof(object1)) !== (typeof object2 === "undefined" ? "undefined" : _typeof(object2))) {
-        return false;
-    }
-
-    var keys1 = Object.keys(object1),
-        keys2 = Object.keys(object2);
-
-    if (keys1.length !== keys2.length) {
-        return false;
-    }
-
-    for (var i = 0, l = keys1.length; i < l; i++) {
-        var key = keys1[i];
-
-        if (keys2.indexOf(key) === -1) {
-            return false;
-        } else if (object1[key] !== object2[key]) {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 /***/ }),
@@ -2922,7 +2864,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       */
 
 
-var _util = __webpack_require__(63);
+var _util = __webpack_require__(335);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -3242,6 +3184,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _util = __webpack_require__(63);
+
+var _util2 = __webpack_require__(335);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -3652,7 +3596,7 @@ var Column = function () {
     }, {
         key: "setWidth",
         value: function setWidth(width) {
-            width = (0, _util.clamp)(width, this.getMinWidth(), this.getMaxWidth());
+            width = (0, _util2.clamp)(width, this.getMinWidth(), this.getMaxWidth());
             this.setMetaData("width", width);
         }
     }, {
@@ -10826,6 +10770,89 @@ module.exports = __webpack_require__(22);
 __webpack_require__(129);
 module.exports = __webpack_require__(128);
 
+
+/***/ }),
+/* 335 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+exports.randomChoice = randomChoice;
+exports.clamp = clamp;
+exports.dictsEqual = dictsEqual;
+/**
+ * Created by mshoc on 10/10/2017.
+ */
+
+/**
+ * Chooses a random choice from an array.
+ * @param array
+ * @return {*}
+ */
+function randomChoice(array) {
+    var c = Math.floor(Math.random() * array.length);
+    return array[c];
+}
+
+/**
+ * Clamps a number between a minimum and maximum value.
+ * @param value
+ * @param min
+ * @param max
+ * @returns {Number}
+ */
+function clamp(value) {
+    var min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+    var max = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+    if (min != null) {
+        value = Math.max(min, value);
+    }
+
+    if (max != null) {
+        value = Math.min(max, value);
+    }
+
+    return value;
+}
+
+/**
+ * Compares to objects to see if they are equivalent.
+ * @param object1
+ * @param object2
+ * @return {boolean}
+ */
+function dictsEqual(object1, object2) {
+    if ((typeof object1 === "undefined" ? "undefined" : _typeof(object1)) !== (typeof object2 === "undefined" ? "undefined" : _typeof(object2))) {
+        return false;
+    }
+
+    var keys1 = Object.keys(object1),
+        keys2 = Object.keys(object2);
+
+    if (keys1.length !== keys2.length) {
+        return false;
+    }
+
+    for (var i = 0, l = keys1.length; i < l; i++) {
+        var key = keys1[i];
+
+        if (keys2.indexOf(key) === -1) {
+            return false;
+        } else if (object1[key] !== object2[key]) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 /***/ })
 /******/ ]);

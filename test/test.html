@@ -116,11 +116,16 @@
             dataLength = 50000,
             data = [];
 
+        function randomChoice(array) {
+            let c = Math.floor(Math.random() * array.length);
+            return array[c];
+        }
+
         function Test() {
             this.id = ++i;
             this.name = "Test Item #" + this.id;
             this.progress = Math.round(Math.random() * 100);
-            this.color = grid.util.randomChoice(["red", "green", "blue", "yellow", "white", "black"]);
+            this.color = randomChoice(["red", "green", "blue", "yellow", "white", "black"]);
             this.price = Math.round(Math.random()*1000);
         }
 

@@ -2,7 +2,7 @@
  * A canvas object is responsible for drawing the currently viewable parts of the data model to the screen and catching
  * and passing events that happen to those element to the grid.
  */
-import {clamp, dictsEqual} from "./util";
+import {clamp} from "../common/util";
 
 export class GridDivCanvas {
     constructor({grid=null, virtualization="row", refreshRate=100, incrementX=20, incrementY=250, verticalPadding=1000, horizontalPadding=1000, speedLimit=1000}={}) {
