@@ -2933,8 +2933,8 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
         var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
             _ref$grid = _ref.grid,
             grid = _ref$grid === undefined ? null : _ref$grid,
-            _ref$cropColumns = _ref.cropColumns,
-            cropColumns = _ref$cropColumns === undefined ? false : _ref$cropColumns,
+            _ref$virtualization = _ref.virtualization,
+            virtualization = _ref$virtualization === undefined ? "row" : _ref$virtualization,
             _ref$refreshRate = _ref.refreshRate,
             refreshRate = _ref$refreshRate === undefined ? 100 : _ref$refreshRate,
             _ref$incrementX = _ref.incrementX,
@@ -2950,7 +2950,7 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
 
         _classCallCheck(this, GridDivCanvas);
 
-        this.cropColumns = cropColumns;
+        this.virtualization = virtualization;
         this.refreshRate = refreshRate;
         this.incrementX = incrementX;
         this.incrementY = incrementY;
@@ -3002,7 +3002,7 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
                 y: y - this.verticalPadding,
                 width: width + this.horizontalPadding * 2,
                 height: height + this.verticalPadding * 2,
-                incrementX: this.cropColumns ? Math.floor(x / this.incrementX) : 0,
+                incrementX: this.virtualization === "col" || this.virtualization === "both" ? Math.floor(x / this.incrementX) : 0,
                 incrementY: Math.floor(y / this.incrementY)
             };
 
@@ -3119,12 +3119,19 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
     }, {
         key: "getRowRange",
         value: function getRowRange(start, stop) {
-            var l = this.model.getDataLength();
+            if (this.virtualization === "both" || this.virtualization === "row") {
+                var l = this.model.getDataLength();
 
-            return {
-                start: (0, _util.clamp)(Math.floor(start / this.model.rowHeight), 0, l),
-                stop: (0, _util.clamp)(Math.floor(stop / this.model.rowHeight), 0, l)
-            };
+                return {
+                    start: (0, _util.clamp)(Math.floor(start / this.model.rowHeight), 0, l),
+                    stop: (0, _util.clamp)(Math.floor(stop / this.model.rowHeight), 0, l)
+                };
+            } else {
+                return {
+                    start: 0,
+                    stop: this.model.getDataLength()
+                };
+            }
         }
     }, {
         key: "getColumnRange",
@@ -3138,7 +3145,7 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
             r.start = 0;
             r.stop = l;
 
-            if (!this.cropColumns) {
+            if (!(this.virtualization === "both" || this.virtualization === "col")) {
                 return r;
             }
 

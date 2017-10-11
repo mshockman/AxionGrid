@@ -145,7 +145,7 @@
             },
             {
                 id: "name",
-                width: 200,
+                width: 4000,
                 label: "Name",
                 resizeable: true,
                 sortable: true,
@@ -204,7 +204,8 @@
         var g = new grid.StandardGrid("#container", data, columns, {
             maxWidth: 400,
             minWidth: 30,
-            dataSortable: true
+            dataSortable: true,
+            virtualization: "both"
         });
 
         var filterBar = new grid.InlineFilterBar(g);
