@@ -32,7 +32,7 @@ export class DataModel {
         this.rowData.clear();
         this.cellData.clear();
         this.data = data;
-        if(this.grid) this.grid.publish("data-change");
+        if(this.grid) this.grid.publish("data-change", "data", this);
     }
 
     /**
@@ -47,7 +47,7 @@ export class DataModel {
         }
 
         this.columnData.length = columns.length;
-        if(this.grid) this.grid.publish("column-change");
+        if(this.grid) this.grid.publish("data-change", "columns", this);
     }
 
     /**

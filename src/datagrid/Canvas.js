@@ -14,10 +14,13 @@ export class GridDivCanvas {
         this.horizontalPadding = horizontalPadding;
         this.speedLimit = speedLimit;
 
+        this.view = $("<div class='grid-viewport'>");
 
         this.canvas = $("<div>").addClass("grid-canvas").css({
             position: "relative"
         });
+
+        this.canvas.appendTo(this.view);
 
         if(grid) {
             this.setGrid(grid);
@@ -32,10 +35,12 @@ export class GridDivCanvas {
 
             cell.handleEvent(event);
         });
-    }
 
-    get view() {
-        return this.canvas;
+        this._onScroll = this.onScroll.bind(this);
+        this.view.on("scroll", this._onScroll);
+
+        this._left = 0;
+        this._top = 0;
     }
 
     get model() {
@@ -44,15 +49,6 @@ export class GridDivCanvas {
 
     setGrid(grid) {
         this.grid = grid;
-
-        this.grid.subscribe("scroll", (viewport) => {
-            this.setViewPort(
-                viewport.left,
-                viewport.top,
-                viewport.width,
-                viewport.height
-            )
-        });
     }
 
     setViewPort(x, y, width, height) {
@@ -100,9 +96,9 @@ export class GridDivCanvas {
             this.viewport.incrementY !== this._viewport.incrementY;
     }
 
-    render(type) {
+    render() {
         if(!this.viewport) {
-            let v = this.grid.viewport.getViewPort();
+            let v = this.getViewPort();
             this.setViewPort(v.left, v.top, v.width, v.height);
         }
 
@@ -170,12 +166,10 @@ export class GridDivCanvas {
 
         this.canvas.empty();
         this.canvas.append(frag);
-
-        if(this.grid) this.grid.publish("render", this, type);
     }
 
     appendTo(element) {
-        return this.canvas.appendTo(element);
+        return this.view.appendTo(element);
     }
 
     getRowRange(start, stop) {
@@ -223,5 +217,43 @@ export class GridDivCanvas {
         }
 
         return r;
+    }
+
+    onScroll() {
+        this._left = this.view.scrollLeft();
+        this._top = this.view.scrollTop();
+        let viewport = this.getViewPort();
+
+        this.setViewPort(viewport.left, viewport.top, viewport.width, viewport.height);
+
+        if(this.grid) this.grid.publish("canvas-scroll", viewport);
+    }
+
+    setScroll(left, top) {
+        this.view.scrollLeft(left);
+        this.view.scrollTop(top);
+
+        let viewport = this.getViewPort();
+
+        this.setViewPort(viewport.left, viewport.top, viewport.width, viewport.height);
+
+        if(this.grid) this.grid.publish("canvas-scroll", viewport);
+    }
+
+    scrollLeft() {
+        return this.view.scrollLeft();
+    }
+
+    scrollTop() {
+        return this.view.scrollTop();
+    }
+
+    getViewPort() {
+        return {
+            left: this._left,
+            top: this._top,
+            width: this.view.innerWidth(),
+            height: this.view.innerHeight()
+        };
     }
 }

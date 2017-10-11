@@ -13,7 +13,7 @@ export class GridHeader {
     setGrid(grid) {
         this.grid = grid;
 
-        this.grid.subscribe("scroll", (viewport) => {
+        this.grid.subscribe("canvas-scroll", (viewport) => {
             this.viewport.scrollLeft(viewport.left);
         });
     }
@@ -71,10 +71,12 @@ export class ColumnRow {
     setGrid(grid) {
         this.grid = grid;
 
-        this.grid.subscribe("render", (target, type) => {
-            if(target === this.grid.canvas && type !== "scroll") {
-                this.render();
-            }
+        this.grid.subscribe("data-change", () => {
+            this.render();
+        });
+
+        this.grid.subscribe("render", () => {
+            this.render();
         });
     }
 
@@ -117,7 +119,7 @@ export class ColumnRow {
             column.setMetaData("dataSort", sortState);
 
             if(this.grid) {
-                this.grid.publish("dataSortChange", this.sortMap[this.sortingStates[sortState]], column);
+                this.grid.publish("data-sort", this.sortMap[this.sortingStates[sortState]], column);
             }
         });
     }
@@ -207,7 +209,7 @@ export class ColumnRow {
             this._modColumnWidths(originalWidths, column, event.clientX - startX);
             event.preventDefault();
             this.refresh(false);
-            this.grid.publish("resizing");
+            this.grid.publish("col-resize");
         };
 
         let onMouseUp = (event) => {
