@@ -1,5 +1,14 @@
-var grid =
-/******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define("grid", [], factory);
+	else if(typeof exports === 'object')
+		exports["grid"] = factory();
+	else
+		root["grid"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -11171,4 +11180,5 @@ var StandardGrid = exports.StandardGrid = function (_BaseGrid) {
 
 /***/ })
 /******/ ]);
+});
 //# sourceMappingURL=grid.js.map

@@ -15,7 +15,8 @@ module.exports = [
             filename: "grid.js",
 
             library: 'grid',
-            libraryTarget: 'var'
+            libraryTarget: 'umd',
+            umdNamedDefine: true
         }
     },
 
@@ -35,7 +36,8 @@ module.exports = [
             filename: "util.js",
 
             library: 'util',
-            libraryTarget: 'var'
+            libraryTarget: 'umd',
+            umdNamedDefine: true
         }
     }
 ];
