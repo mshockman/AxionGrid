@@ -1,3 +1,6 @@
+// noinspection NodeJsCodingAssistanceForCoreModules
+var path = require('path');
+
 module.exports = [
     {
         entry: ["babel-polyfill", "./src/datagrid"],
@@ -21,9 +24,9 @@ module.exports = [
     },
 
     {
-        entry: ["./src/common"],
+        entry: ["babel-polyfill", "./src/AdvancedFilters/QueryBuilder.js"],
 
-        devtool: "inline-source-map",
+        devtool: "source-map",
 
         module: {
             rules: [
@@ -33,9 +36,9 @@ module.exports = [
 
         output: {
             path: __dirname + "/build",
-            filename: "util.js",
+            filename: "qb.js",
 
-            library: 'util',
+            library: 'qb',
             libraryTarget: 'umd',
             umdNamedDefine: true
         }

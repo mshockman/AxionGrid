@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script type="text/javascript" src="../node_modules/jquery/dist/jquery.js"></script>
+    <script src="../libs/jquery-ui-1.12.1.custom/jquery-ui.js"></script>
+    <script type="text/javascript" src="../build/util.js"></script>
+
+    <script type="text/javascript" src="../build/qb.js"></script>
+
+    <style type="text/css">
+
+    </style>
+</head>
+<body>
+    <div id="test">
+
+    </div>
+    <script type="text/javascript">
+        var q = new qb.QueryBuilder(
+            [
+                {
+                    field: "Title",
+                    filter: new qb.TextFilter(null, "Title")
+                },
+                {
+                    field: "SKU",
+                    filter: new qb.TextFilter(null, "SKU")
+                }
+            ]
+        );
+        q.appendTo("#test");
+    </script>
+</body>
+</html>
