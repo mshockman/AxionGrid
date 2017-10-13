@@ -84,6 +84,7 @@ export class ColumnRow {
         this.view.sortable({
             axis: "x",
             cancel: "input,textarea,button,select,option,.ui-resize-handle",
+            items: ".grid-column.ui-sortable",
 
             update: (event, ui) => {
                 this.applySort();
