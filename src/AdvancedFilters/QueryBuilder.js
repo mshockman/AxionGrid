@@ -4,7 +4,7 @@ export class QueryBuilder {
         this.fields = fields;
         this.maxDepth = maxDepth;
 
-        this.view = $("<div class='query-builder'>");
+        this.view = $("<ul class='query-builder'>");
         this.root = new QueryGroup(this, this, 0);
         this.root.appendTo(this.view);
     }
@@ -55,7 +55,7 @@ export class QueryGroup {
             }
         });
 
-        this.itemList = $("<div class='query-list'>");
+        this.itemList = $("<ul class='query-list'>");
         this.view.append(header, this.itemList);
     }
 

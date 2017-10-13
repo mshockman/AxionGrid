@@ -16,7 +16,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack -w"
+    "start": "webpack -w",
+    "scss": "sass sass/querybuilder.scss dist/css/querybuilder.css"
   },
   "author": "",
   "license": "ISC"
