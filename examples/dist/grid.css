@@ -1,0 +1,22 @@
+.full-grid {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0; }
+  .full-grid > .grid-footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 20px;
+    height: 40px;
+    border-top: 1px solid #000; }
+  .full-grid > .status-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 20px;
+    border-top: 1px solid #000; }
+
+/*# sourceMappingURL=grid.css.map */

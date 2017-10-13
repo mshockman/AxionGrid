@@ -42,5 +42,22 @@ module.exports = [
             libraryTarget: 'umd',
             umdNamedDefine: true
         }
+    },
+
+    {
+        entry: ["babel-polyfill", "./examples/src/page.js"],
+
+        devtool: "source-map",
+
+        module: {
+            rules: [
+                { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" }
+            ]
+        },
+
+        output: {
+            path: __dirname + "/examples/dist/",
+            filename: "my-page.js"
+        }
     }
 ];

@@ -5272,6 +5272,7 @@ var ColumnRow = exports.ColumnRow = function () {
             this.view.sortable({
                 axis: "x",
                 cancel: "input,textarea,button,select,option,.ui-resize-handle",
+                items: ".grid-column.ui-sortable",
 
                 update: function update(event, ui) {
                     _this3.applySort();
