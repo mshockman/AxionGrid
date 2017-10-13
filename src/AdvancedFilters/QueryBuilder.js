@@ -1,11 +1,14 @@
 
 export class QueryBuilder {
-    constructor(fields, maxDepth=null) {
+    constructor(fields, maxDepth=null, maxItems=null, maxRules=null, maxGroups=null) {
         this.fields = fields;
         this.maxDepth = maxDepth;
+        this.maxItems = maxItems;
+        this.maxRules = maxRules;
+        this.maxGroups = maxGroups;
 
         this.view = $("<ul class='query-builder'>");
-        this.root = new QueryGroup(this, this, 0);
+        this.root = new QueryGroup(null, this, 0);
         this.root.appendTo(this.view);
     }
 
@@ -16,6 +19,50 @@ export class QueryBuilder {
     getFilter() {
         return this.root.getFilter();
     }
+
+    onItemAdd(item) {
+        let items = this.view.find(".query-item");
+
+        if(this.maxItems != null) {
+            if(items.length >= this.maxItems) {
+                this.view.find(".btn-add-item").prop("disabled", true).addClass("disabled");
+            }
+        }
+
+        if(this.maxRules != null) {
+            if(items.filter(".query-rule").length >= this.maxRules) {
+                this.view.find(".btn-add-rule").prop("disabled", true).addClass("disabled");
+            }
+        }
+
+        if(this.maxGroups != null) {
+            if(items.filter(".query-group").length >= this.maxGroups) {
+                this.view.find(".btn-add-group").prop("disabled", true).addClass("disabled");
+            }
+        }
+    }
+
+    onItemRemove(item) {
+        let items = this.view.find(".query-item");
+
+        if(this.maxItems != null) {
+            if(items.length < this.maxItems) {
+                this.view.find(".btn-add-item.disabled").prop("disabled", false).removeClass("disabled");
+            }
+        }
+
+        if(this.maxRules != null) {
+            if(items.filter(".query-rule").length < this.maxRules) {
+                this.view.find(".btn-add-rule.disabled").prop("disabled", false).removeClass("disabled");
+            }
+        }
+
+        if(this.maxGroups != null) {
+            if(items.filter(".query-group").length < this.maxGroups) {
+                this.view.find(".btn-add-group.disabled").prop("disabled", false).removeClass("disabled");
+            }
+        }
+    }
 }
 
 
@@ -24,16 +71,20 @@ export class QueryGroup {
         this.parent = parent;
         this.builder = builder;
         this.depth = depth;
-        this.view = $("<li class='query-group'>");
+        this.view = $("<li class='query-group query-item'>");
         this.view.data("filter", this);
 
         let header = $("<div class='query-header'>"),
             operatorWrapper = $("<div class='query-operators'>"),
             actionsWrapper = $("<div class='query-actions'>"),
-            addRuleBTN = $("<button type='button'>Add Rule</button>"),
-            addGroupBTN = $("<button type='button'>Add Group</button>"),
+            addRuleBTN = $("<button type='button' class='btn-add-item btn-add-rule'>Add Rule</button>"),
+            addGroupBTN = $("<button type='button' class='btn-add-item btn-add-group'>Add Group</button>"),
             andBTN = $("<button type='button' class='selected'>And</button>"),
             orBTN = $("<button type='button'>Or</button>");
+
+        if(this.builder.maxDepth != null && this.builder.maxDepth <= depth) {
+            addGroupBTN.prop("disabled", true).addClass("disabled");
+        }
 
         andBTN.data("operator", "AND");
         orBTN.data("operator", "OR");
@@ -42,6 +93,16 @@ export class QueryGroup {
         operatorWrapper.append(andBTN, orBTN);
         header.append(operatorWrapper, actionsWrapper);
         this.operatorWrapper = operatorWrapper;
+
+        if(this.parent) {
+            let deleteBTN = $("<button type='button'>Delete</button>");
+            actionsWrapper.append(deleteBTN);
+
+            deleteBTN.on("click", (event) => {
+                this.view.remove();
+                this.builder.onItemRemove(this);
+            });
+        }
 
         addGroupBTN.on("click", () => this.addGroup());
         addRuleBTN.on("click", () => this.addRule());
@@ -66,12 +127,14 @@ export class QueryGroup {
     addGroup() {
         let group = new QueryGroup(this, this.builder, this.depth + 1);
         group.appendTo(this.itemList);
+        this.builder.onItemAdd(group);
         return true;
     }
 
     addRule() {
         let rule = new QueryRule(this, this.builder);
         rule.appendTo(this.itemList);
+        this.builder.onItemAdd(rule);
         return true;
     }
 
@@ -100,11 +163,23 @@ export class QueryRule {
         this.parent = parent;
         this.builder = builder;
         this.depth = depth;
-        this.view = $("<li class='query-rule'>");
+        this.view = $("<li class='query-rule query-item'>");
         this.filterView = $("<div class='query-filter'>");
+        this.actionsView = $("<div class='query-actions'>");
         this.view.data("filter", this);
 
         this.fieldsSelect = $("<select>");
+
+        // If the rule has a parent add a delete button.
+        if(this.parent) {
+            let deleteBTN = $("<button type='button'>Delete</button>");
+            this.actionsView.append(deleteBTN);
+
+            deleteBTN.on("click", (event) => {
+                this.view.remove();
+                this.builder.onItemRemove(this);
+            });
+        }
 
         for(let i = 0, l = this.builder.fields.length; i < l; i++) {
             let field = this.builder.fields[i],
@@ -123,7 +198,7 @@ export class QueryRule {
             this.setFilter(this.fieldsSelect.find(":selected").data("filter"));
         });
 
-        this.view.append(this.fieldsSelect, this.filterView);
+        this.view.append(this.fieldsSelect, this.filterView, this.actionsView);
     }
 
     appendTo(selector) {

@@ -3,38 +3,42 @@
   width: 900px;
   border: 1px solid #000;
   padding: 10px 10px 0 10px;
-}
 
-.query-list {
-  list-style: none;
-  padding-top: 10px;
-}
+  .query-list {
+    list-style: none;
+    padding-top: 10px;
+  }
 
-.query-list .query-rule, .query-item {
-  margin-bottom: 10px;
-}
+  .query-list .query-rule, .query-item {
+    margin-bottom: 10px;
+  }
 
-.query-header {
-  display: flex;
-}
+  .query-rule {
+    display: flex;
+  }
 
-.query-operators {
-  flex: 1;
-}
+  .query-header {
+    display: flex;
+  }
 
-.query-actions {
-  flex: 1;
-  text-align: right;
-}
+  .query-operators {
+    flex: 1;
+  }
 
-.query-filter {
-  display: inline-block;
-}
+  .query-actions {
+    flex: 1;
+    text-align: right;
+  }
 
-.query-operators .selected {
-  background-color: #007fff;
-}
+  .query-filter {
+    display: inline-block;
+  }
 
-.query-rule select, .query-rule input {
-  margin-right: 5px;
+  .query-operators .selected {
+    background-color: #007fff;
+  }
+
+  .query-rule select, .query-rule input {
+    margin-right: 5px;
+  }
 }
