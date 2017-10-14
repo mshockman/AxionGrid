@@ -34,11 +34,7 @@ export class GridDivCanvas extends Publisher {
             cell.handleEvent(event);
         });
 
-        this._onScroll = this.onScroll.bind(this);
-        this.view.on("scroll", this._onScroll);
-
-        this._left = 0;
-        this._top = 0;
+        this.setViewPortController(new StandardDIVViewPort(this, this.view, this.view));
 
         if(model) this.setDataModel(model);
     }
@@ -83,6 +79,13 @@ export class GridDivCanvas extends Publisher {
 
             this._timer = setTimeout(onTimeout, this.refreshRate);
         }
+
+        this.publish("viewport-change", {
+            left: x,
+            top: y,
+            width: width,
+            height: height
+        });
     }
 
     hasChanged() {
@@ -102,12 +105,13 @@ export class GridDivCanvas extends Publisher {
             columnRange = this.getColumnRange(this.viewport.x, this.viewport.x + this.viewport.width),
             rowPos = 0,
             totalWidth = this.model.getWidth(),
+            totalHeight = this.model.getHeight(),
             frag = document.createDocumentFragment();
 
         this._viewport = this.viewport;
 
         this.canvas.css({
-            height: this.model.getHeight(),
+            height: totalHeight,
             width: totalWidth
         });
 
@@ -222,41 +226,91 @@ export class GridDivCanvas extends Publisher {
         return r;
     }
 
-    onScroll() {
-        this._left = this.view.scrollLeft();
-        this._top = this.view.scrollTop();
-        let viewport = this.getViewPort();
-
-        this.setViewPort(viewport.left, viewport.top, viewport.width, viewport.height);
-
-        this.publish("canvas-scroll", viewport);
+    setViewPortController(controller) {
+        this.viewportController = controller;
     }
 
     setScroll(left, top) {
-        this.view.scrollLeft(left);
-        this.view.scrollTop(top);
+        this.viewportController.setScroll(left, top);
 
-        let viewport = this.getViewPort();
-
+        let viewport = this.viewportController.getViewPort();
         this.setViewPort(viewport.left, viewport.top, viewport.width, viewport.height);
-
-        this.publish("canvas-scroll", viewport);
     }
 
-    scrollLeft() {
-        return this.view.scrollLeft();
+    getViewPort() {
+        return this.viewportController.getViewPort();
+    }
+}
+
+
+export class StandardDIVViewPort {
+    constructor(canvas, viewportLeft, viewportTop) {
+        this.canvas = canvas;
+        this.viewportLeft = viewportLeft == null ? this.canvas.view : $(viewportLeft);
+        this.viewportTop = viewportTop == null ? this.canvas.view : $(viewportTop);
+        this.onScroll = this.onScroll.bind(this);
+
+        this.viewportLeft.on("scroll", this.onScroll);
+
+        if(this.viewportTop[0] !== this.viewportLeft[0]) {
+            this.viewportTop.on("scroll", this.onScroll);
+        }
     }
 
-    scrollTop() {
-        return this.view.scrollTop();
+    onScroll() {
+        let viewport = this.getViewPort();
+        this.canvas.setViewPort(viewport.left, viewport.top, viewport.width, viewport.height);
     }
 
     getViewPort() {
         return {
-            left: this._left,
-            top: this._top,
-            width: this.view.innerWidth(),
-            height: this.view.innerHeight()
+            left: this.left,
+            top: this.top,
+            width: this.width,
+            height: this.height
         };
+    }
+
+    setScroll(left=null, top=null) {
+        if(left !== null) this.viewportLeft.scrollLeft(left);
+        if(top !== null) this.viewportTop.scrollTop(top);
+    }
+
+    get left() {
+        let offset = this.canvas.view.offset(),
+            delta;
+
+        // An error with be thrown if trying to get the offset of the window.
+        try {
+            let viewport = this.viewportLeft.offset();
+            delta = viewport.left - offset.left;
+        } catch(err) {
+            delta = -offset.left;
+        }
+
+        return this.viewportLeft.scrollLeft() + delta;
+    }
+
+    get top() {
+        let offset = this.canvas.view.offset(),
+            delta;
+
+        // An error with be thrown if trying to get the offset of the window.
+        try {
+            let viewport = this.viewportTop.offset();
+            delta = viewport.top - offset.top;
+        } catch(err) {
+            delta = -offset.top;
+        }
+
+        return this.viewportTop.scrollTop() + delta;
+    }
+
+    get width() {
+        return this.viewportLeft.innerWidth();
+    }
+
+    get height() {
+        return this.viewportTop.innerHeight();
     }
 }

@@ -18,7 +18,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack -w",
-    "scss": "sass sass/querybuilder.scss dist/css/querybuilder.css"
+    "scss": "sass sass/querybuilder.scss dist/css/querybuilder.css",
+    "watchPrototypeSCSS": "sass --watch examples/scss/grid.scss:examples/dist/grid.css"
   },
   "author": "",
   "license": "ISC"

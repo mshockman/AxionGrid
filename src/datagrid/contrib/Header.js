@@ -1,9 +1,10 @@
 
 
 export class GridHeader {
-    constructor() {
+    constructor(scroll=true) {
         this.view = $("<div class='grid-header'>");
         this.viewport = $("<div class='grid-header-viewport'>");
+        this.scroll = scroll;
         this.viewport.css({
             position: "relative"
         });
@@ -13,9 +14,11 @@ export class GridHeader {
     setGrid(grid) {
         this.grid = grid;
 
-        this.grid.subscribe("canvas-scroll", (viewport) => {
-            this.viewport.scrollLeft(viewport.left);
-        });
+        if(this.scroll) {
+            this.grid.subscribe("viewport-change", (viewport) => {
+                this.viewport.scrollLeft(viewport.left);
+            });
+        }
     }
 
     appendTo(element) {

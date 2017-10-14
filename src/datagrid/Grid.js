@@ -37,7 +37,7 @@ export class BaseGrid extends Publisher {
 
 
 export class StandardGrid extends BaseGrid {
-    constructor(container, data, columns, options={}) {
+    constructor(container, data, columns, options={headerScroll: true}) {
         let model = new DataModel(options),
             canvas = new GridDivCanvas(options);
 
@@ -47,7 +47,7 @@ export class StandardGrid extends BaseGrid {
         if(columns) this.model.setColumns(columns);
 
         this.container = $(container);
-        this.header = new GridHeader();
+        this.header = new GridHeader(typeof options.headerScroll === "boolean" ? options.headerScroll : true);
         this.columnRow = new ColumnRow(null, options);
 
         this.header.setGrid(this);
