@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link type="text/css" rel="stylesheet" href="../libs/font-awesome-4.7.0/css/font-awesome.css" />
+
+    <!--<script type="text/javascript" src="../libs/require.js"></script>-->
+    <!--<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>-->
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>-->
+    <script type="text/javascript" src="../node_modules/jquery/dist/jquery.js"></script>
+    <script src="../libs/jquery-ui-1.12.1.custom/jquery-ui.js"></script>
+    <script type="text/javascript" src="../build/util.js"></script>
+
+    <script type="text/javascript" src="../build/grid.js"></script>
+
+    <style type="text/css">
+        .scrollbar-horizontal {
+            position: relative;
+            width: 1000px;
+            height: 20px;
+            border: 1px solid #000;
+        }
+
+        .scrollbar-handle {
+            position: absolute;
+            height: 100%;
+            background-color: #454545;
+            cursor: pointer;
+        }
+
+        .scrollbar-horizontal .scrollbar-handle-wrapper {
+            position: absolute;
+            left: 20px;
+            right: 20px;
+            top: 0;
+            bottom: 0;
+        }
+
+        .scrollbar-horizontal .positive {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+        }
+
+        .scrollbar-horizontal .negative {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+
+    <script type="text/javascript">
+        let d = new grid.ScrollBar("horizontal", 500, `1000`);
+
+        d.appendTo("#container");
+
+        d.subscribe("scroll", function(pos) {
+            console.log(pos);
+        });
+    </script>
+</body>
+</html>

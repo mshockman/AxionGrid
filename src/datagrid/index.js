@@ -8,6 +8,8 @@ import {InlineFilterBar, TextFilter} from "./contrib/InlineFilters";
 
 import {BaseGrid, StandardGrid} from './Grid';
 
+import {ScrollBar} from './contrib/ScrollBar';
+
 
 export {
     DataModel,
@@ -21,4 +23,5 @@ export {
     TextFilter,
     StandardGrid,
     StandardDIVViewPort,
+    ScrollBar,
 };

@@ -5580,7 +5580,7 @@ if (fails(function () { return new $WeakMap().set((Object.freeze || Object)(tmp)
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.StandardDIVViewPort = exports.StandardGrid = exports.TextFilter = exports.InlineFilterBar = exports.ColumnRow = exports.GridHeader = exports.BaseGrid = exports.CheckboxColumn = exports.GridDivCanvas = exports.util = exports.DataModel = undefined;
+exports.ScrollBar = exports.StandardDIVViewPort = exports.StandardGrid = exports.TextFilter = exports.InlineFilterBar = exports.ColumnRow = exports.GridHeader = exports.BaseGrid = exports.CheckboxColumn = exports.GridDivCanvas = exports.util = exports.DataModel = undefined;
 
 var _DataView = __webpack_require__(93);
 
@@ -5598,6 +5598,8 @@ var _InlineFilters = __webpack_require__(134);
 
 var _Grid = __webpack_require__(132);
 
+var _ScrollBar = __webpack_require__(337);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 exports.DataModel = _DataView.DataModel;
@@ -5611,6 +5613,7 @@ exports.InlineFilterBar = _InlineFilters.InlineFilterBar;
 exports.TextFilter = _InlineFilters.TextFilter;
 exports.StandardGrid = _Grid.StandardGrid;
 exports.StandardDIVViewPort = _Canvas.StandardDIVViewPort;
+exports.ScrollBar = _ScrollBar.ScrollBar;
 
 /***/ }),
 /* 131 */
@@ -11254,6 +11257,218 @@ module.exports = __webpack_require__(22);
 __webpack_require__(131);
 module.exports = __webpack_require__(130);
 
+
+/***/ }),
+/* 337 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.ScrollBar = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _util = __webpack_require__(91);
+
+var _events = __webpack_require__(63);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ScrollBar = exports.ScrollBar = function (_Publisher) {
+    _inherits(ScrollBar, _Publisher);
+
+    function ScrollBar(type, size, viewport) {
+        var increment = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 10;
+        var delay = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 500;
+        var pos = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
+        var fps = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 1000 / 60;
+        var speed = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : 500 / 60;
+
+        _classCallCheck(this, ScrollBar);
+
+        var _this = _possibleConstructorReturn(this, (ScrollBar.__proto__ || Object.getPrototypeOf(ScrollBar)).call(this));
+
+        var c = "scrollbar-vertical";
+        _this.type = "vertical";
+
+        if (type === "horizontal") {
+            _this.type = "horizontal";
+            c = "scrollbar-horizontal";
+        }
+
+        _this.increment = increment;
+        _this.delay = delay;
+        _this.pos = pos;
+        _this.fps = fps;
+        _this.speed = speed;
+
+        _this.positiveButton = _this.initButton("positive");
+        _this.negativeButton = _this.initButton("negative");
+        _this.initHandle(_this.handle);
+
+        _this.wrapper = $("<div class='scrollbar-handle-wrapper'>");
+        _this.wrapper.append(_this.handle);
+
+        _this.view = $("<div class='scrollbar " + c + "'></div>");
+        _this.view.append(_this.negativeButton, _this.wrapper, _this.positiveButton);
+        _this.setSize(size, viewport);
+        return _this;
+    }
+
+    _createClass(ScrollBar, [{
+        key: "setSize",
+        value: function setSize(size, total) {
+            this.size = size;
+            this.total = total;
+
+            this.ratio = this.size / this.total;
+            this.handle.css(this.type === "horizontal" ? "width" : height, (this.ratio * 100).toFixed(2) + "%");
+        }
+    }, {
+        key: "appendTo",
+        value: function appendTo(selector) {
+            this.view.appendTo(selector);
+        }
+    }, {
+        key: "initHandle",
+        value: function initHandle() {
+            var _this2 = this;
+
+            this.handle = $("<div class='scrollbar-handle'>");
+
+            var doc = null,
+                onMouseMove = null,
+                captured = false;
+
+            var onMouseUp = function onMouseUp(event) {
+                doc.off("mouseup", onMouseUp);
+                doc.off("mousemove", onMouseMove);
+                captured = false;
+            };
+
+            var onMouseDown = function onMouseDown(event) {
+                event.preventDefault();
+
+                if (captured) {
+                    doc.off("mouseup", onMouseUp);
+                    doc.off("mousemove", onMouseMove);
+                }
+
+                captured = true;
+
+                var offset = _this2.handle.offset(),
+                    deltaX = event.pageX - offset.left,
+                    deltaY = event.pageY - offset.top,
+                    width = _this2.wrapper.innerWidth(),
+                    wrapper = _this2.wrapper.offset();
+
+                onMouseMove = function onMouseMove(event) {
+                    if (_this2.type === "horizontal") {
+                        var x = (event.clientX - wrapper.left - deltaX) / width;
+                        x = (0, _util.clamp)(x, 0, _this2.ratio);
+                        _this2.setPosition(x * _this2.total);
+                    } else {
+                        var y = (event.clientY - wrapper.top - deltaY) / width;
+                        y = (0, _util.clamp)(y, 0, _this2.ratio);
+                        _this2.setPosition(y * _this2.total);
+                    }
+                };
+
+                doc = $(document);
+
+                doc.on("mousemove", onMouseMove);
+                doc.on("mouseup", onMouseUp);
+            };
+
+            this.handle.on("mousedown", onMouseDown);
+        }
+    }, {
+        key: "initButton",
+        value: function initButton(type) {
+            var _this3 = this;
+
+            var isMouseOver = false,
+                timer = null,
+                that = this,
+                doc = null,
+                button = $("<button type='button' class='" + type + " btn'></button>"),
+                active = false;
+
+            if (type === "negative") {
+                type = -1;
+            } else {
+                type = 1;
+            }
+
+            button.on("mouseover", function (event) {
+                isMouseOver = true;
+
+                if (active && !timer) {
+                    timer = setTimeout(fn, that.fps);
+                }
+            });
+
+            button.on("mouseout", function (event) {
+                isMouseOver = false;
+
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = null;
+                }
+            });
+
+            var fn = function fn() {
+                that.setPosition(that.pos + that.speed * type);
+                timer = setTimeout(fn, that.fps);
+            };
+
+            var onMouseUp = function onMouseUp(event) {
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = null;
+                }
+
+                doc.off("mouseup", onMouseUp);
+                doc = null;
+                active = false;
+            };
+
+            button.on("mousedown", function (event) {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+
+                _this3.setPosition(that.pos + that.increment * type);
+
+                active = true;
+                timer = setTimeout(fn, that.delay);
+                doc = $(document);
+                doc.on("mouseup", onMouseUp);
+            });
+
+            return button;
+        }
+    }, {
+        key: "setPosition",
+        value: function setPosition(amount) {
+            this.pos = (0, _util.clamp)(amount, 0, this.total - this.size);
+            var ratio = this.pos / this.total,
+                pos = (ratio * 100).toFixed(2);
+            this.handle.css(this.type === "horizontal" ? "left" : "top", pos + "%");
+            this.publish("scroll", this.total * ratio);
+        }
+    }]);
+
+    return ScrollBar;
+}(_events.Publisher);
 
 /***/ })
 /******/ ]);
