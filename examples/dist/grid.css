@@ -5,18 +5,30 @@
   right: 0;
   bottom: 0; }
   .full-grid > .grid-footer {
-    position: absolute;
+    position: fixed;
     left: 0;
     right: 0;
     bottom: 20px;
     height: 40px;
-    border-top: 1px solid #000; }
+    border-top: 1px solid #000;
+    background-color: #2b2b2b;
+    z-index: 2; }
+  .full-grid .grid-header-wrapper {
+    background-color: #2b2b2b;
+    color: #fff; }
   .full-grid > .status-bar {
-    position: absolute;
+    position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
     height: 20px;
-    border-top: 1px solid #000; }
+    border-top: 1px solid #000;
+    background-color: #2b2b2b;
+    z-index: 2; }
+  .full-grid .grid-viewport {
+    margin-bottom: 90px; }
+  .full-grid .grid-column-row .grid-column {
+    height: 45px;
+    line-height: 45px; }
 
 /*# sourceMappingURL=grid.css.map */

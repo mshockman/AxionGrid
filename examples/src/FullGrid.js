@@ -1,6 +1,6 @@
 import {BaseGrid} from "../../src/datagrid/Grid";
 import {DataModel} from "../../src/datagrid/DataView";
-import {GridDivCanvas} from "../../src/datagrid/Canvas";
+import {GridDivCanvas, StandardDIVViewPort} from "../../src/datagrid/Canvas";
 import {CheckboxColumn} from "../../src/datagrid/contrib/CheckboxColumn";
 import {GridHeader, ColumnRow} from "../../src/datagrid/contrib/Header";
 
@@ -14,6 +14,9 @@ export class FullGrid extends BaseGrid {
             });
 
         super(model, canvas);
+
+        canvas.setViewPortController(new StandardDIVViewPort(canvas, canvas.view, window));
+
         this.endpoint = endpoint;
         this.definations = columns;
         this.filters = filters;
@@ -28,6 +31,7 @@ export class FullGrid extends BaseGrid {
         this.view.appendTo(container);
 
         this.view.find(".grid-header-wrapper").append(this.headerRow.view);
+        this.view.find(".data-grid").append(this.canvas.view);
     }
 
     template() {

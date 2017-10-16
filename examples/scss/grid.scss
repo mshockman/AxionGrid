@@ -1,6 +1,8 @@
 .full-grid {
   $statusBarHeight: 20px;
   $footerHeight: 40px;
+  $headerBGColor: #2b2b2b;
+  $headerColor: #fff;
 
   position: absolute;
   left: 0;
@@ -17,20 +19,40 @@
   }
 
   > .grid-footer {
-    position: absolute;
+    position: fixed;
     left: 0;
     right: 0;
     bottom: $statusBarHeight;
     height: $footerHeight;
     border-top: 1px solid #000;
+    background-color: #2b2b2b;
+    z-index: 2;
+  }
+
+  .grid-header-wrapper {
+    background-color: $headerBGColor;
+    color: $headerColor;
   }
 
   > .status-bar {
-    position: absolute;
+    position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
     height: $statusBarHeight;
     border-top: 1px solid #000;
+    background-color: #2b2b2b;
+    z-index: 2;
+  }
+
+  .grid-viewport {
+    margin-bottom: 90px;
+  }
+
+  .grid-column-row {
+    .grid-column {
+      height: 45px;
+      line-height: 45px;
+    }
   }
 }
