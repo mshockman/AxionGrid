@@ -54,8 +54,8 @@ class TestGrid extends FullGrid {
 
                 title: {
                     id: "title",
-                    width: 400,
-                    maxWidth: 600,
+                    width: 2000,
+                    maxWidth: 9000,
                     label: "Title",
                     resizeable: true,
                     sortable: true,
@@ -117,7 +117,7 @@ class TestGrid extends FullGrid {
 
         this.setColumns("inventory_number", "brand", "title", "price", "cost");
 
-        this.canvas.render();
+        this.render();
     }
 }
 

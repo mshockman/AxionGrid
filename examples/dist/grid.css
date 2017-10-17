@@ -3,7 +3,10 @@
   left: 0;
   top: 0;
   right: 0;
-  bottom: 0; }
+  bottom: 0;
+  overflow: hidden; }
+  .full-grid .grid-header-viewport {
+    overflow-x: hidden; }
   .full-grid > .grid-footer {
     position: fixed;
     left: 0;
@@ -26,9 +29,52 @@
     background-color: #2b2b2b;
     z-index: 2; }
   .full-grid .grid-viewport {
-    margin-bottom: 90px; }
+    overflow-x: auto;
+    overflow-y: scroll;
+    position: absolute;
+    top: 45px;
+    bottom: 60px;
+    left: 0;
+    right: 0; }
   .full-grid .grid-column-row .grid-column {
     height: 45px;
-    line-height: 45px; }
+    line-height: 45px;
+    position: relative; }
+    .full-grid .grid-column-row .grid-column .ui-resize-handle {
+      position: absolute;
+      right: -5px;
+      top: 0;
+      bottom: 0;
+      width: 10px;
+      z-index: 2;
+      cursor: col-resize; }
+  .full-grid .scrollbar.scrollbar-horizontal {
+    position: absolute;
+    right: 10px;
+    left: 50%;
+    height: 20px;
+    top: 10px; }
+    .full-grid .scrollbar.scrollbar-horizontal .negative.btn {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 20px; }
+    .full-grid .scrollbar.scrollbar-horizontal .positive.btn {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 20px; }
+    .full-grid .scrollbar.scrollbar-horizontal .scrollbar-handle-wrapper {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      top: 0;
+      bottom: 0; }
+      .full-grid .scrollbar.scrollbar-horizontal .scrollbar-handle-wrapper .scrollbar-handle {
+        position: absolute;
+        background-color: #ccc;
+        height: 100%; }
 
 /*# sourceMappingURL=grid.css.map */

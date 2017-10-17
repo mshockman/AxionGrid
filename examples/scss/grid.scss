@@ -3,12 +3,19 @@
   $footerHeight: 40px;
   $headerBGColor: #2b2b2b;
   $headerColor: #fff;
+  $columnHeight: 45px;
+  $headerHeight: $columnHeight;
 
   position: absolute;
   left: 0;
   top: 0;
   right: 0;
   bottom: 0;
+  overflow: hidden;
+
+  .grid-header-viewport {
+    overflow-x: hidden;
+  }
 
   > .filters {
 
@@ -46,13 +53,68 @@
   }
 
   .grid-viewport {
-    margin-bottom: 90px;
+    overflow-x: auto;
+    overflow-y: scroll;
+    position: absolute;
+    top: $headerHeight;
+    bottom: $footerHeight + $statusBarHeight;
+    left: 0;
+    right: 0;
   }
 
   .grid-column-row {
     .grid-column {
       height: 45px;
       line-height: 45px;
+      position: relative;
+
+      .ui-resize-handle {
+        position: absolute;
+        right: -5px;
+        top: 0;
+        bottom: 0;
+        width: 10px;
+        z-index: 2;
+        cursor: col-resize;
+      }
+    }
+  }
+
+  .scrollbar.scrollbar-horizontal {
+    position: absolute;
+    right: 10px;
+    left: 50%;
+    height: 20px;
+    top: 10px;
+
+    .negative.btn {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 20px;
+    }
+
+    .positive.btn {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 20px;
+    }
+
+    .scrollbar-handle-wrapper {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      top: 0;
+      bottom: 0;
+
+      .scrollbar-handle {
+        position: absolute;
+        background-color: #ccc;
+        height: 100%;
+      }
     }
   }
 }

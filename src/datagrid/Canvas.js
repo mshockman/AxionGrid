@@ -240,6 +240,30 @@ export class GridDivCanvas extends Publisher {
     getViewPort() {
         return this.viewportController.getViewPort();
     }
+
+    get viewportWidth() {
+        return this.viewportController.width;
+    }
+
+    get viewportHeight() {
+        return this.viewportController.height;
+    }
+
+    get scrollLeft() {
+        return this.viewportController.scrollLeft;
+    }
+
+    get scrollTop() {
+        return this.viewportController.scrollTop;
+    }
+
+    get totalWidth() {
+        return this.model.getWidth();
+    }
+
+    get totalHeight() {
+        return this.model.getHeight();
+    }
 }
 
 
@@ -312,5 +336,13 @@ export class StandardDIVViewPort {
 
     get height() {
         return this.viewportTop.innerHeight();
+    }
+
+    get scrollLeft() {
+        return this.viewportLeft.scrollLeft();
+    }
+
+    get scrollTop() {
+        return this.viewportTop.scrollTop();
     }
 }

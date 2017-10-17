@@ -2,6 +2,7 @@ import {BaseGrid} from "../../src/datagrid/Grid";
 import {DataModel} from "../../src/datagrid/DataView";
 import {GridDivCanvas, StandardDIVViewPort} from "../../src/datagrid/Canvas";
 import {CheckboxColumn} from "../../src/datagrid/contrib/CheckboxColumn";
+import {ScrollBar} from "../../src/datagrid/contrib/ScrollBar";
 import {GridHeader, ColumnRow} from "../../src/datagrid/contrib/Header";
 
 
@@ -15,13 +16,14 @@ export class FullGrid extends BaseGrid {
 
         super(model, canvas);
 
-        canvas.setViewPortController(new StandardDIVViewPort(canvas, canvas.view, window));
+        // canvas.setViewPortController(new StandardDIVViewPort(canvas, canvas.view, window));
 
         this.endpoint = endpoint;
         this.definations = columns;
         this.filters = filters;
 
         this.headerRow = new GridHeader();
+        this.headerRow.setGrid(this);
         this.columnRow = new ColumnRow(this, {
             dataSortable: true
         });
@@ -30,8 +32,18 @@ export class FullGrid extends BaseGrid {
         this.template();
         this.view.appendTo(container);
 
+        // this.hScrollBar = new ScrollBar("horizontal");
+        // this.hScrollBar.setPosition(0);
+
+        // this.hScrollBar.subscribe("scroll", (pos) => {
+        //     this.canvas.setScroll(pos, null);
+        // });
+
         this.view.find(".grid-header-wrapper").append(this.headerRow.view);
         this.view.find(".data-grid").append(this.canvas.view);
+        this.footer = this.view.find(".grid-footer");
+
+        // this.footer.append(this.hScrollBar.view);
     }
 
     template() {
@@ -75,5 +87,13 @@ export class FullGrid extends BaseGrid {
         }
 
         super.setColumns(_columns);
+    }
+
+    render() {
+        super.render();
+        // this.hScrollBar.setSize(this.canvas.viewportWidth, this.canvas.totalWidth);
+        // this.hScrollBar.setPosition(this.canvas.scrollLeft);
+        //
+        // console.log("Rendering.");
     }
 }

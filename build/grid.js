@@ -5121,6 +5121,36 @@ var GridDivCanvas = exports.GridDivCanvas = function (_Publisher) {
         value: function getViewPort() {
             return this.viewportController.getViewPort();
         }
+    }, {
+        key: "viewportWidth",
+        get: function get() {
+            return this.viewportController.width;
+        }
+    }, {
+        key: "viewportHeight",
+        get: function get() {
+            return this.viewportController.height;
+        }
+    }, {
+        key: "scrollLeft",
+        get: function get() {
+            return this.viewportController.scrollLeft;
+        }
+    }, {
+        key: "scrollTop",
+        get: function get() {
+            return this.viewportController.scrollTop;
+        }
+    }, {
+        key: "totalWidth",
+        get: function get() {
+            return this.model.getWidth();
+        }
+    }, {
+        key: "totalHeight",
+        get: function get() {
+            return this.model.getHeight();
+        }
     }]);
 
     return GridDivCanvas;
@@ -5208,6 +5238,16 @@ var StandardDIVViewPort = exports.StandardDIVViewPort = function () {
         key: "height",
         get: function get() {
             return this.viewportTop.innerHeight();
+        }
+    }, {
+        key: "scrollLeft",
+        get: function get() {
+            return this.viewportLeft.scrollLeft();
+        }
+    }, {
+        key: "scrollTop",
+        get: function get() {
+            return this.viewportTop.scrollTop();
         }
     }]);
 
