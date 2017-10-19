@@ -198,10 +198,18 @@ class Row {
         return new Cell(this.model, this.rowNumber, cell_number);
     }
 
+    /**
+     * @deprecated In favor of height.
+     * @returns {number}
+     */
     getHeight() {
         return this.model.rowHeight;
     }
 
+    /**
+     * @deprecated In favor of data.
+     * @returns {Object}
+     */
     getDataItem() {
         return this.model.getDataItem(this.rowNumber);
     }
@@ -218,6 +226,10 @@ class Row {
         return this.model.rowData.get(this.rowNumber, key);
     }
 
+    /**
+     * @deprecated In favor of top.
+     * @returns {number}
+     */
     getTop() {
         return this.rowNumber * this.model.rowHeight;
     }

@@ -27,6 +27,7 @@
 
         .grid-viewport {
             overflow-x: scroll;
+            height: 500px;
         }
 
         .grid-canvas {
@@ -230,7 +231,7 @@
         var filterBar = new grid.InlineFilterBar(g);
         g.header.append(filterBar);
 
-        g.canvas.setViewPortController(new grid.StandardDIVViewPort(g.canvas, g.canvas.view, window));
+        // g.canvas.setViewPortController(new grid.StandardDIVViewPort(g.canvas, g.canvas.view, window));
 
         g.render();
 

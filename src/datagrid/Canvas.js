@@ -121,7 +121,7 @@ export class GridDivCanvas extends Publisher {
         for(let y = rowRange.start; y < rowRange.stop; y++) {
             let cellPos = 0,
                 row = this.model.getRow(y),
-                top = row.getTop(),
+                top = row.top,
                 rowHeight = row.getHeight(),
                 $row = $("<div>").addClass("grid-row").css({
                     position: "absolute",

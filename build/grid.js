@@ -4370,11 +4370,23 @@ var Row = function () {
         value: function getCell(cell_number) {
             return new Cell(this.model, this.rowNumber, cell_number);
         }
+
+        /**
+         * @deprecated In favor of height.
+         * @returns {number}
+         */
+
     }, {
         key: "getHeight",
         value: function getHeight() {
             return this.model.rowHeight;
         }
+
+        /**
+         * @deprecated In favor of data.
+         * @returns {Object}
+         */
+
     }, {
         key: "getDataItem",
         value: function getDataItem() {
@@ -4394,6 +4406,12 @@ var Row = function () {
 
             return this.model.rowData.get(this.rowNumber, key);
         }
+
+        /**
+         * @deprecated In favor of top.
+         * @returns {number}
+         */
+
     }, {
         key: "getTop",
         value: function getTop() {
@@ -5302,7 +5320,7 @@ var GridDivCanvas = exports.GridDivCanvas = function (_Publisher) {
             for (var y = rowRange.start; y < rowRange.stop; y++) {
                 var cellPos = 0,
                     row = this.model.getRow(y),
-                    top = row.getTop(),
+                    top = row.top,
                     rowHeight = row.getHeight(),
                     $row = $("<div>").addClass("grid-row").css({
                     position: "absolute",
