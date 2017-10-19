@@ -125,6 +125,11 @@ export class DataModel extends Publisher {
         return this.columnData.length;
     }
 
+    /**
+     *
+     * @param rowNumber
+     * @returns {Row}
+     */
     getRow(rowNumber) {
         if(rowNumber < 0 || rowNumber >= this.getDataLength()) {
             throw new Error("Row Number is out of bounds.");
@@ -133,6 +138,12 @@ export class DataModel extends Publisher {
         return new Row(this, rowNumber);
     }
 
+    /**
+     *
+     * @param rowNumber
+     * @param cellNumber
+     * @returns {Cell}
+     */
     getCell(rowNumber, cellNumber) {
         if(rowNumber < 0 || rowNumber >= this.getDataLength()) {
             throw new Error("Row Number is out of bounds.");
@@ -182,36 +193,20 @@ class Row {
         this.rowNumber = index;
     }
 
-    getAttributes() {
+    get attributes() {
         return this.getMetaData("attributes") || {};
     }
 
-    getStyle() {
+    get style() {
         return this.getMetaData("style") || {};
     }
 
-    getClasses() {
+    get classes() {
         return this.getMetaData("classes") || "";
     }
 
     getCell(cell_number) {
         return new Cell(this.model, this.rowNumber, cell_number);
-    }
-
-    /**
-     * @deprecated In favor of height.
-     * @returns {number}
-     */
-    getHeight() {
-        return this.model.rowHeight;
-    }
-
-    /**
-     * @deprecated In favor of data.
-     * @returns {Object}
-     */
-    getDataItem() {
-        return this.model.getDataItem(this.rowNumber);
     }
 
     setMetaData(key, value) {
@@ -224,14 +219,6 @@ class Row {
         }
 
         return this.model.rowData.get(this.rowNumber, key);
-    }
-
-    /**
-     * @deprecated In favor of top.
-     * @returns {number}
-     */
-    getTop() {
-        return this.rowNumber * this.model.rowHeight;
     }
 
     get top() {
@@ -276,66 +263,16 @@ class Cell {
         return this.parentColumn.getMetaData(columnKey);
     }
 
-    /**
-     * Use parentRow property instead.
-     * @deprecated Depreciated in favor of parentRow
-     * @returns {Row}
-     */
-    getRow() {
-        return new Row(this.model, this.rowNumber);
-    }
-
-    /**
-     * Use parentColumn property instead.
-     * @deprecated
-     * @returns {Column}
-     */
-    getColumn() {
-        return new Column(this.model, this.cellNumber);
-    }
-
-    getAttributes() {
+    get attributes() {
         return this.getInheritedObject("attributes", "cellAttributes", "cellAttributes");
     }
 
-    getStyle() {
-        return this.getInheritedObject("style", "cellStyle", "cellStyle");
+    get style() {
+        return this.getInheritedObject("style", "cellStyle", "cellStyle") || {};
     }
 
-    getClasses() {
+    get classes() {
         return this.getInheritedObject("classes", "cellClasses", "cellClasses");
-    }
-
-    /**
-     * Deprecated in favor of value property and getFormattedValue() method.
-     * @deprecated
-     * @returns {*}
-     */
-    getValue() {
-        let formatter = this.getInheritedProperty("formatter", "cellFormatter", "cellFormatter");
-        return formatter ? formatter(this) : this.value;
-    }
-
-    /**
-     * Deprecated in favor of value property.
-     * @deprecated
-     * @returns {*}
-     */
-    getRawValue() {
-        let id = this.parentColumn.getMetaData("id");
-
-        if(id) {
-            return this.model.getDataItem(this.rowNumber)[id];
-        }
-    }
-
-    /**
-     * Use index property.
-     * @deprecated
-     * @returns {string}
-     */
-    getIndex() {
-        return coordinateString(this.cellNumber, this.rowNumber);
     }
 
     /**
@@ -361,15 +298,6 @@ class Cell {
     }
 
     /**
-     * Use width property.
-     * @deprecated
-     * @returns {*}
-     */
-    getWidth() {
-        return this.parentColumn.width;
-    }
-
-    /**
      * Capture and event for the cell and passes it along to the correct method.
      * @param event
      */
@@ -387,15 +315,6 @@ class Cell {
         if(handle) {
             handle(this, event);
         }
-    }
-
-    /**
-     * Depreciated in favor of left property.
-     * @deprecated
-     * @returns {*}
-     */
-    getLeft() {
-        return this.parentColumn.left;
     }
 
     get id() {
@@ -422,7 +341,7 @@ class Cell {
     }
 
     get width() {
-        return this.parentColumn.getWidth();
+        return this.parentColumn.width;
     }
 
     get height() {
@@ -430,10 +349,18 @@ class Cell {
         throw new Error("Not Yet Implemented");
     }
 
+    /**
+     *
+     * @returns {Row}
+     */
     get parentRow() {
         return new Row(this.model, this.rowNumber);
     }
 
+    /**
+     *
+     * @returns {Column}
+     */
     get parentColumn() {
         return new Column(this.model, this.cellNumber);
     }
@@ -457,7 +384,7 @@ class Column {
         this.columnNumber = columnNumber;
     }
 
-    getLabel() {
+    get label() {
         let label = this.getMetaData("label") || "";
 
         if(typeof label === "function") {
@@ -465,48 +392,6 @@ class Column {
         }
 
         return label;
-    }
-
-    /**
-     * Use width property
-     * @deprecated
-     * @returns {*}
-     */
-    getWidth() {
-        let width = this.getMetaData("width");
-
-        if(width == null) {
-            return this.model.defaultColumnWidth;
-        }
-
-        return width;
-    }
-
-    /**
-     * Use height property.
-     * @deprecated
-     * @param width
-     */
-    setWidth(width) {
-        width = clamp(width, this.minWidth, this.maxWidth);
-        this.setMetaData("width", width);
-    }
-
-    /**
-     * Use this.width += amount;
-     *
-     * let expected = this.width + amount;
-     * this.width = expected;
-     * return expected - this.width;
-     *
-     * @deprecated
-     * @param {number} amount
-     * @returns {number}
-     */
-    addWidth(amount) {
-        let expected = this.width + amount;
-        this.width = expected;
-        return expected - this.width;
     }
 
     /**
@@ -532,15 +417,6 @@ class Column {
     }
 
     /**
-     * Use data property.
-     * @deprecated
-     * @returns {{}}
-     */
-    getDefinition() {
-        return this.model.columnData.get(this.columnNumber);
-    }
-
-    /**
      * Gets the cell for the column at the given row index.
      * @param index
      * @returns {Cell}
@@ -553,7 +429,7 @@ class Column {
      * Returns a map of css properties for the Column.
      * @returns {{}}
      */
-    getStyle() {
+    get style() {
         return this.getMetaData("style") || {};
     }
 
@@ -561,7 +437,7 @@ class Column {
      * Returns a map of attributes for the column.
      * @returns {{}}
      */
-    getAttributes() {
+    get attributes() {
         return this.getMetaData("attributes") || {};
     }
 
@@ -569,69 +445,19 @@ class Column {
      * Returns a string of css classes.
      * @returns {string}
      */
-    getClasses() {
+    get classes() {
         return this.getMetaData("classes") || "";
     }
 
-    /**
-     * Use left property.
-     * @deprecated
-     * @returns {number}
-     */
-    getLeft() {
-        let pos = 0;
-
-        for(let i = 0; i < this.columnNumber; i++) {
-            let column = this.model.getColumn(i);
-            pos += column.width;
-        }
-
-        return pos;
-    }
-
-    /**
-     * Use minWidth property
-     * @deprecated
-     * @returns {*}
-     */
-    getMinWidth() {
-        let min = this.getMetaData("minWidth");
-
-        if(min == null) {
-            min = this.model.minWidth;
-        }
-
-        if(typeof min !== "number") {
-            return 0;
-        } else {
-            return min;
-        }
-    }
-
-    /**
-     * Use maxWidth property.
-     * @deprecated
-     * @returns {*}
-     */
-    getMaxWidth() {
-        let max = this.getMetaData("maxWidth");
-
-        if(max == null) {
-            max = this.model.maxWidth;
-        }
-
-        return typeof max !== "number" ? Infinity : max;
-    }
-
-    isResizeable() {
+    get isResizeable() {
         return this.getMetaData("resizeable") || false;
     }
 
-    nextColumn() {
+    get nextColumn() {
         return this.model.getColumnLength() > this.columnNumber + 1 ? new Column(this.model, this.columnNumber+1) : null;
     }
 
-    prevColumn() {
+    get prevColumn() {
         return this.columnNumber - 1 >= 0 ? new Column(this.model, this.columnNumber-1) : null;
     }
 
@@ -682,10 +508,10 @@ class Column {
         let width = this.getMetaData("width");
 
         if(width == null) {
-            return this.model.defaultColumnWidth;
+            width = this.model.defaultColumnWidth;
         }
 
-        return width;
+        return clamp(width, this.minWidth, this.maxWidth);
     }
 
     set width(value) {

@@ -23,7 +23,7 @@ export class CheckboxColumn {
         }
 
         this.cellFormatter = function(cell) {
-            let checked = cell.getRow().getMetaData(name) || false,
+            let checked = cell.parentRow.getMetaData(name) || false,
                 r = $("<input type='checkbox' name='"+name+"'>");
 
             if(checked) {

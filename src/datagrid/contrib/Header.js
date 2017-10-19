@@ -142,7 +142,7 @@ export class ColumnRow {
         for(let i = 0, l = this.model.getColumnLength(); i < l; i++) {
             let $column = $("<div class='grid-column'>"),
                 column = this.model.getColumn(i),
-                name = column.getLabel(),
+                name = column.label,
                 width = column.width;
 
             if(this.draggable && column.getMetaData("sortable")) {
@@ -153,9 +153,9 @@ export class ColumnRow {
                 $column.addClass(this.sortingStates[column.getMetaData("dataSort") || 0]);
             }
 
-            $column.addClass(column.getClasses());
-            $column.attr(column.getAttributes());
-            $column.css(column.getStyle());
+            $column.addClass(column.classes);
+            $column.attr(column.attributes);
+            $column.css(column.style);
             $column.data({
                 "columnNumber": column.columnNumber,
                 "grid": this.grid
@@ -169,7 +169,7 @@ export class ColumnRow {
 
             $column.append(name);
 
-            if(column.isResizeable()) {
+            if(column.isResizeable) {
                 let resizer = $("<div class='ui-resize-handle'>");
                 $column.append(resizer);
             }
@@ -241,14 +241,14 @@ export class ColumnRow {
         let expected;
 
         while(column && change) {
-            if(column.isResizeable()) {
+            if(column.isResizeable) {
                 column.width = original[column.columnNumber];
                 expected = column.width + change;
                 column.width = expected;
                 change = expected - column.width;
             }
 
-            column = column.prevColumn();
+            column = column.prevColumn;
         }
     }
 

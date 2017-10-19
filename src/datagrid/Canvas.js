@@ -122,7 +122,7 @@ export class GridDivCanvas extends Publisher {
             let cellPos = 0,
                 row = this.model.getRow(y),
                 top = row.top,
-                rowHeight = row.getHeight(),
+                rowHeight = row.height,
                 $row = $("<div>").addClass("grid-row").css({
                     position: "absolute",
                     top: top,
@@ -130,12 +130,12 @@ export class GridDivCanvas extends Publisher {
                     width: totalWidth
                 });
 
-            $row.addClass(row.getClasses());
-            $row.attr(row.getAttributes());
-            $row.css(row.getStyle());
+            $row.addClass(row.classes);
+            $row.attr(row.attributes);
+            $row.css(row.style);
             $row.data("rowNumber", row.rowNumber);
             $row.attr("data-row-number", row.rowNumber);
-            rowPos += row.getHeight();
+            rowPos += row.height;
 
             cellPos = row.getCell(columnRange.start).left;
 
@@ -164,9 +164,9 @@ export class GridDivCanvas extends Publisher {
                 });
 
                 $cell.attr("data-cell-number", cell.cellNumber);
-                $cell.css(cell.getStyle());
-                $cell.attr(cell.getAttributes());
-                $cell.addClass(cell.getClasses());
+                $cell.css(cell.style);
+                $cell.attr(cell.attributes);
+                $cell.addClass(cell.classes);
 
                 $row.append($cell);
             }

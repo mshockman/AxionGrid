@@ -4273,6 +4273,13 @@ var DataModel = exports.DataModel = function (_Publisher) {
         value: function getColumnLength() {
             return this.columnData.length;
         }
+
+        /**
+         *
+         * @param rowNumber
+         * @returns {Row}
+         */
+
     }, {
         key: "getRow",
         value: function getRow(rowNumber) {
@@ -4282,6 +4289,14 @@ var DataModel = exports.DataModel = function (_Publisher) {
 
             return new Row(this, rowNumber);
         }
+
+        /**
+         *
+         * @param rowNumber
+         * @param cellNumber
+         * @returns {Cell}
+         */
+
     }, {
         key: "getCell",
         value: function getCell(rowNumber, cellNumber) {
@@ -4341,46 +4356,9 @@ var Row = function () {
     }
 
     _createClass(Row, [{
-        key: "getAttributes",
-        value: function getAttributes() {
-            return this.getMetaData("attributes") || {};
-        }
-    }, {
-        key: "getStyle",
-        value: function getStyle() {
-            return this.getMetaData("style") || {};
-        }
-    }, {
-        key: "getClasses",
-        value: function getClasses() {
-            return this.getMetaData("classes") || "";
-        }
-    }, {
         key: "getCell",
         value: function getCell(cell_number) {
             return new Cell(this.model, this.rowNumber, cell_number);
-        }
-
-        /**
-         * @deprecated In favor of height.
-         * @returns {number}
-         */
-
-    }, {
-        key: "getHeight",
-        value: function getHeight() {
-            return this.model.rowHeight;
-        }
-
-        /**
-         * @deprecated In favor of data.
-         * @returns {Object}
-         */
-
-    }, {
-        key: "getDataItem",
-        value: function getDataItem() {
-            return this.model.getDataItem(this.rowNumber);
         }
     }, {
         key: "setMetaData",
@@ -4396,16 +4374,20 @@ var Row = function () {
 
             return this.model.rowData.get(this.rowNumber, key);
         }
-
-        /**
-         * @deprecated In favor of top.
-         * @returns {number}
-         */
-
     }, {
-        key: "getTop",
-        value: function getTop() {
-            return this.rowNumber * this.model.rowHeight;
+        key: "attributes",
+        get: function get() {
+            return this.getMetaData("attributes") || {};
+        }
+    }, {
+        key: "style",
+        get: function get() {
+            return this.getMetaData("style") || {};
+        }
+    }, {
+        key: "classes",
+        get: function get() {
+            return this.getMetaData("classes") || "";
         }
     }, {
         key: "top",
@@ -4459,95 +4441,15 @@ var Cell = function () {
             if (r !== undefined) return r;
             return this.parentColumn.getMetaData(columnKey);
         }
-
-        /**
-         * Use parentRow property instead.
-         * @deprecated Depreciated in favor of parentRow
-         * @returns {Row}
-         */
-
     }, {
-        key: "getRow",
-        value: function getRow() {
-            return new Row(this.model, this.rowNumber);
-        }
+        key: "setMetaData",
 
-        /**
-         * Use parentColumn property instead.
-         * @deprecated
-         * @returns {Column}
-         */
-
-    }, {
-        key: "getColumn",
-        value: function getColumn() {
-            return new Column(this.model, this.cellNumber);
-        }
-    }, {
-        key: "getAttributes",
-        value: function getAttributes() {
-            return this.getInheritedObject("attributes", "cellAttributes", "cellAttributes");
-        }
-    }, {
-        key: "getStyle",
-        value: function getStyle() {
-            return this.getInheritedObject("style", "cellStyle", "cellStyle");
-        }
-    }, {
-        key: "getClasses",
-        value: function getClasses() {
-            return this.getInheritedObject("classes", "cellClasses", "cellClasses");
-        }
-
-        /**
-         * Deprecated in favor of value property and getFormattedValue() method.
-         * @deprecated
-         * @returns {*}
-         */
-
-    }, {
-        key: "getValue",
-        value: function getValue() {
-            var formatter = this.getInheritedProperty("formatter", "cellFormatter", "cellFormatter");
-            return formatter ? formatter(this) : this.value;
-        }
-
-        /**
-         * Deprecated in favor of value property.
-         * @deprecated
-         * @returns {*}
-         */
-
-    }, {
-        key: "getRawValue",
-        value: function getRawValue() {
-            var id = this.parentColumn.getMetaData("id");
-
-            if (id) {
-                return this.model.getDataItem(this.rowNumber)[id];
-            }
-        }
-
-        /**
-         * Use index property.
-         * @deprecated
-         * @returns {string}
-         */
-
-    }, {
-        key: "getIndex",
-        value: function getIndex() {
-            return (0, _util.coordinateString)(this.cellNumber, this.rowNumber);
-        }
 
         /**
          * Sets the cells metadata.
          * @param key
          * @param value
          */
-
-    }, {
-        key: "setMetaData",
         value: function setMetaData(key, value) {
             this.model.cellData.set(this.index, key, value);
         }
@@ -4566,18 +4468,6 @@ var Cell = function () {
             }
 
             return this.model.cellData.get(this.id, key);
-        }
-
-        /**
-         * Use width property.
-         * @deprecated
-         * @returns {*}
-         */
-
-    }, {
-        key: "getWidth",
-        value: function getWidth() {
-            return this.parentColumn.width;
         }
 
         /**
@@ -4602,17 +4492,20 @@ var Cell = function () {
                 handle(this, event);
             }
         }
-
-        /**
-         * Depreciated in favor of left property.
-         * @deprecated
-         * @returns {*}
-         */
-
     }, {
-        key: "getLeft",
-        value: function getLeft() {
-            return this.parentColumn.left;
+        key: "attributes",
+        get: function get() {
+            return this.getInheritedObject("attributes", "cellAttributes", "cellAttributes");
+        }
+    }, {
+        key: "style",
+        get: function get() {
+            return this.getInheritedObject("style", "cellStyle", "cellStyle") || {};
+        }
+    }, {
+        key: "classes",
+        get: function get() {
+            return this.getInheritedObject("classes", "cellClasses", "cellClasses");
         }
     }, {
         key: "id",
@@ -4642,7 +4535,7 @@ var Cell = function () {
     }, {
         key: "width",
         get: function get() {
-            return this.parentColumn.getWidth();
+            return this.parentColumn.width;
         }
     }, {
         key: "height",
@@ -4650,11 +4543,23 @@ var Cell = function () {
             // todo implement.
             throw new Error("Not Yet Implemented");
         }
+
+        /**
+         *
+         * @returns {Row}
+         */
+
     }, {
         key: "parentRow",
         get: function get() {
             return new Row(this.model, this.rowNumber);
         }
+
+        /**
+         *
+         * @returns {Column}
+         */
+
     }, {
         key: "parentColumn",
         get: function get() {
@@ -4686,76 +4591,14 @@ var Column = function () {
     }
 
     _createClass(Column, [{
-        key: "getLabel",
-        value: function getLabel() {
-            var label = this.getMetaData("label") || "";
+        key: "setMetaData",
 
-            if (typeof label === "function") {
-                return label(this);
-            }
-
-            return label;
-        }
-
-        /**
-         * Use width property
-         * @deprecated
-         * @returns {*}
-         */
-
-    }, {
-        key: "getWidth",
-        value: function getWidth() {
-            var width = this.getMetaData("width");
-
-            if (width == null) {
-                return this.model.defaultColumnWidth;
-            }
-
-            return width;
-        }
-
-        /**
-         * Use height property.
-         * @deprecated
-         * @param width
-         */
-
-    }, {
-        key: "setWidth",
-        value: function setWidth(width) {
-            width = (0, _util2.clamp)(width, this.minWidth, this.maxWidth);
-            this.setMetaData("width", width);
-        }
-
-        /**
-         * Use this.width += amount;
-         *
-         * let expected = this.width + amount;
-         * this.width = expected;
-         * return expected - this.width;
-         *
-         * @deprecated
-         * @param {number} amount
-         * @returns {number}
-         */
-
-    }, {
-        key: "addWidth",
-        value: function addWidth(amount) {
-            var expected = this.width + amount;
-            this.width = expected;
-            return expected - this.width;
-        }
 
         /**
          * Sets Column metadata.
          * @param {string} key
          * @param value
          */
-
-    }, {
-        key: "setMetaData",
         value: function setMetaData(key, value) {
             this.model.columnData.set(this.columnNumber, key, value);
         }
@@ -4777,18 +4620,6 @@ var Column = function () {
         }
 
         /**
-         * Use data property.
-         * @deprecated
-         * @returns {{}}
-         */
-
-    }, {
-        key: "getDefinition",
-        value: function getDefinition() {
-            return this.model.columnData.get(this.columnNumber);
-        }
-
-        /**
          * Gets the cell for the column at the given row index.
          * @param index
          * @returns {Cell}
@@ -4806,8 +4637,19 @@ var Column = function () {
          */
 
     }, {
-        key: "getStyle",
-        value: function getStyle() {
+        key: "label",
+        get: function get() {
+            var label = this.getMetaData("label") || "";
+
+            if (typeof label === "function") {
+                return label(this);
+            }
+
+            return label;
+        }
+    }, {
+        key: "style",
+        get: function get() {
             return this.getMetaData("style") || {};
         }
 
@@ -4817,8 +4659,8 @@ var Column = function () {
          */
 
     }, {
-        key: "getAttributes",
-        value: function getAttributes() {
+        key: "attributes",
+        get: function get() {
             return this.getMetaData("attributes") || {};
         }
 
@@ -4828,82 +4670,23 @@ var Column = function () {
          */
 
     }, {
-        key: "getClasses",
-        value: function getClasses() {
+        key: "classes",
+        get: function get() {
             return this.getMetaData("classes") || "";
-        }
-
-        /**
-         * Use left property.
-         * @deprecated
-         * @returns {number}
-         */
-
-    }, {
-        key: "getLeft",
-        value: function getLeft() {
-            var pos = 0;
-
-            for (var i = 0; i < this.columnNumber; i++) {
-                var column = this.model.getColumn(i);
-                pos += column.width;
-            }
-
-            return pos;
-        }
-
-        /**
-         * Use minWidth property
-         * @deprecated
-         * @returns {*}
-         */
-
-    }, {
-        key: "getMinWidth",
-        value: function getMinWidth() {
-            var min = this.getMetaData("minWidth");
-
-            if (min == null) {
-                min = this.model.minWidth;
-            }
-
-            if (typeof min !== "number") {
-                return 0;
-            } else {
-                return min;
-            }
-        }
-
-        /**
-         * Use maxWidth property.
-         * @deprecated
-         * @returns {*}
-         */
-
-    }, {
-        key: "getMaxWidth",
-        value: function getMaxWidth() {
-            var max = this.getMetaData("maxWidth");
-
-            if (max == null) {
-                max = this.model.maxWidth;
-            }
-
-            return typeof max !== "number" ? Infinity : max;
         }
     }, {
         key: "isResizeable",
-        value: function isResizeable() {
+        get: function get() {
             return this.getMetaData("resizeable") || false;
         }
     }, {
         key: "nextColumn",
-        value: function nextColumn() {
+        get: function get() {
             return this.model.getColumnLength() > this.columnNumber + 1 ? new Column(this.model, this.columnNumber + 1) : null;
         }
     }, {
         key: "prevColumn",
-        value: function prevColumn() {
+        get: function get() {
             return this.columnNumber - 1 >= 0 ? new Column(this.model, this.columnNumber - 1) : null;
         }
     }, {
@@ -4960,10 +4743,10 @@ var Column = function () {
             var width = this.getMetaData("width");
 
             if (width == null) {
-                return this.model.defaultColumnWidth;
+                width = this.model.defaultColumnWidth;
             }
 
-            return width;
+            return (0, _util2.clamp)(width, this.minWidth, this.maxWidth);
         },
         set: function set(value) {
             this.setMetaData("width", (0, _util2.clamp)(value, this.minWidth, this.maxWidth));
@@ -5230,7 +5013,7 @@ var GridDivCanvas = exports.GridDivCanvas = function (_Publisher) {
                 var cellPos = 0,
                     row = this.model.getRow(y),
                     top = row.top,
-                    rowHeight = row.getHeight(),
+                    rowHeight = row.height,
                     $row = $("<div>").addClass("grid-row").css({
                     position: "absolute",
                     top: top,
@@ -5238,12 +5021,12 @@ var GridDivCanvas = exports.GridDivCanvas = function (_Publisher) {
                     width: totalWidth
                 });
 
-                $row.addClass(row.getClasses());
-                $row.attr(row.getAttributes());
-                $row.css(row.getStyle());
+                $row.addClass(row.classes);
+                $row.attr(row.attributes);
+                $row.css(row.style);
                 $row.data("rowNumber", row.rowNumber);
                 $row.attr("data-row-number", row.rowNumber);
-                rowPos += row.getHeight();
+                rowPos += row.height;
 
                 cellPos = row.getCell(columnRange.start).left;
 
@@ -5272,9 +5055,9 @@ var GridDivCanvas = exports.GridDivCanvas = function (_Publisher) {
                     });
 
                     $cell.attr("data-cell-number", cell.cellNumber);
-                    $cell.css(cell.getStyle());
-                    $cell.attr(cell.getAttributes());
-                    $cell.addClass(cell.getClasses());
+                    $cell.css(cell.style);
+                    $cell.attr(cell.attributes);
+                    $cell.addClass(cell.classes);
 
                     $row.append($cell);
                 }
@@ -5682,7 +5465,7 @@ var ColumnRow = exports.ColumnRow = function () {
             for (var i = 0, l = this.model.getColumnLength(); i < l; i++) {
                 var $column = $("<div class='grid-column'>"),
                     column = this.model.getColumn(i),
-                    name = column.getLabel(),
+                    name = column.label,
                     width = column.width;
 
                 if (this.draggable && column.getMetaData("sortable")) {
@@ -5693,9 +5476,9 @@ var ColumnRow = exports.ColumnRow = function () {
                     $column.addClass(this.sortingStates[column.getMetaData("dataSort") || 0]);
                 }
 
-                $column.addClass(column.getClasses());
-                $column.attr(column.getAttributes());
-                $column.css(column.getStyle());
+                $column.addClass(column.classes);
+                $column.attr(column.attributes);
+                $column.css(column.style);
                 $column.data({
                     "columnNumber": column.columnNumber,
                     "grid": this.grid
@@ -5709,7 +5492,7 @@ var ColumnRow = exports.ColumnRow = function () {
 
                 $column.append(name);
 
-                if (column.isResizeable()) {
+                if (column.isResizeable) {
                     var resizer = $("<div class='ui-resize-handle'>");
                     $column.append(resizer);
                 }
@@ -5789,14 +5572,14 @@ var ColumnRow = exports.ColumnRow = function () {
             var expected = void 0;
 
             while (column && change) {
-                if (column.isResizeable()) {
+                if (column.isResizeable) {
                     column.width = original[column.columnNumber];
                     expected = column.width + change;
                     column.width = expected;
                     change = expected - column.width;
                 }
 
-                column = column.prevColumn();
+                column = column.prevColumn;
             }
         }
 
@@ -11681,7 +11464,7 @@ var CheckboxColumn = exports.CheckboxColumn = function CheckboxColumn(name, opti
     }
 
     this.cellFormatter = function (cell) {
-        var checked = cell.getRow().getMetaData(name) || false,
+        var checked = cell.parentRow.getMetaData(name) || false,
             r = $("<input type='checkbox' name='" + name + "'>");
 
         if (checked) {
