@@ -89,7 +89,7 @@ export class ColumnRow {
             cancel: "input,textarea,button,select,option,.ui-resize-handle",
             items: ".grid-column.ui-sortable",
 
-            update: (event, ui) => {
+            update: () => {
                 this.applySort();
             }
         });
@@ -143,7 +143,7 @@ export class ColumnRow {
             let $column = $("<div class='grid-column'>"),
                 column = this.model.getColumn(i),
                 name = column.getLabel(),
-                width = column.getWidth();
+                width = column.width;
 
             if(this.draggable && column.getMetaData("sortable")) {
                 $column.addClass("ui-sortable");
@@ -189,7 +189,7 @@ export class ColumnRow {
         let r = [];
 
         for(let i = 0, l = this.model.getColumnLength(); i < l; i++) {
-            r.push(this.model.getColumn(i).getWidth());
+            r.push(this.model.getColumn(i).width);
         }
 
         return r;
@@ -230,15 +230,22 @@ export class ColumnRow {
         $doc.on("mouseup", onMouseUp);
     }
 
+    /**
+     *
+     * @param original
+     * @param {Column} column
+     * @param change
+     * @private
+     */
     _modColumnWidths(original, column, change) {
         let expected;
 
         while(column && change) {
             if(column.isResizeable()) {
-                column.setWidth(original[column.columnNumber]);
-                expected = column.getWidth() + change;
-                column.addWidth(change);
-                change = expected - column.getWidth();
+                column.width = original[column.columnNumber];
+                expected = column.width + change;
+                column.width = expected;
+                change = expected - column.width;
             }
 
             column = column.prevColumn();
@@ -258,7 +265,7 @@ export class ColumnRow {
         $columns.each((index, element) => {
             let $column = $(element),
                 column = this.model.getColumn($column.data("columnNumber")),
-                width = column.getWidth();
+                width = column.width;
 
             $column.css({
                 width: width
@@ -277,7 +284,7 @@ export class ColumnRow {
 
             $column.data("columnNumber", i++);
 
-            definitions.push(column.getDefinition());
+            definitions.push(column.data);
         });
 
         this.model.setColumns(definitions);

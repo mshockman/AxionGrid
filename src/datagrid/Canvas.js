@@ -40,6 +40,9 @@ export class GridDivCanvas extends Publisher {
     }
 
     setDataModel(model) {
+        /**
+         * @type DataModel
+         */
         this.model = model;
     }
 
@@ -134,25 +137,32 @@ export class GridDivCanvas extends Publisher {
             $row.attr("data-row-number", row.rowNumber);
             rowPos += row.getHeight();
 
-            cellPos = row.getCell(columnRange.start).getLeft();
+            cellPos = row.getCell(columnRange.start).left;
 
             for(let x = columnRange.start; x < columnRange.stop; x++) {
                 let cell = row.getCell(x),
-                    cellWidth = cell.getWidth(),
+                    cellWidth = cell.width,
                     $cell = $("<div class='grid-cell'>").css({
                         position: "absolute",
                         left: cellPos,
                         width: cellWidth,
                         height: rowHeight
-                    });
+                    }),
+                    formatter = cell.formatter;
 
                 cellPos += cellWidth;
 
-                $cell.append(cell.getValue());
+                if(formatter) {
+                    $cell.append(formatter(cell));
+                } else {
+                    $cell.append(cell.value);
+                }
+
                 $cell.data({
                     "cellNumber": cell.cellNumber,
                     "rowNumber": row.rowNumber
                 });
+
                 $cell.attr("data-cell-number", cell.cellNumber);
                 $cell.css(cell.getStyle());
                 $cell.attr(cell.getAttributes());
@@ -204,7 +214,7 @@ export class GridDivCanvas extends Publisher {
 
         for(; i < l; i++) {
             column = this.model.getColumn(i);
-            pos += column.getWidth();
+            pos += column.width;
             r.start = i;
 
             if(pos > start) {
@@ -215,7 +225,7 @@ export class GridDivCanvas extends Publisher {
 
         for(; i < l; i++) {
             column = this.model.getColumn(i);
-            pos += column.getWidth();
+            pos += column.width;
             r.stop = i + 1;
 
             if(pos >= stop) {

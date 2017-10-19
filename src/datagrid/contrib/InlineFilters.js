@@ -33,7 +33,7 @@ export class InlineFilterBar {
                 inlineFilter = column.getMetaData("inlineFilter");
 
             $column.css({
-                width: column.getWidth(),
+                width: column.width,
                 display: "inline-block"
             });
 
