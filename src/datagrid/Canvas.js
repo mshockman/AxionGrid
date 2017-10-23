@@ -2,7 +2,6 @@
  * A canvas object is responsible for drawing the currently viewable parts of the data model to the screen and catching
  * and passing events that happen to those element to the grid.
  */
-import {clamp} from "../common/util";
 
 
 export class GridDivCanvas {
@@ -50,14 +49,28 @@ export class GridDivCanvas {
         if(grid) this.setGrid(grid);
     }
 
+    /**
+     * Sets the parent grid object for the canvas.
+     * @param grid {BaseGrid}
+     */
     setGrid(grid) {
         this.grid = grid;
     }
 
+    /**
+     * Append the canvas element to the specified selector.
+     * @param element
+     * @returns {*}
+     */
     appendTo(element) {
         return this.view.appendTo(element);
     }
 
+    /**
+     * Renders the row by creating a jquery object.  Can be overridden to customize.
+     * @param row
+     * @returns {jQuery}
+     */
     rowRenderer(row) {
         let $row = $("<div class='grid-row'>").css({
             position: "absolute",
@@ -75,6 +88,11 @@ export class GridDivCanvas {
         return $row;
     }
 
+    /**
+     * Renders the cell by creating a jquery object.  Can be overridden to customize.
+     * @param cell
+     * @returns {*|jQuery}
+     */
     cellRenderer(cell) {
         let $cell = $("<div class='grid-cell'>").css({
                 position: "absolute",
@@ -102,6 +120,9 @@ export class GridDivCanvas {
         return $cell;
     }
 
+    /**
+     * Function that renders every visible row to the canvas.
+     */
     render() {
         let rowStart = 0,
             rowEnd = this.model.getDataLength(),
@@ -161,6 +182,13 @@ export class GridDivCanvas {
         this.canvas.append(frag);
     }
 
+    /**
+     * Set the viewport elements of the canvas.  By default this is set to this.view in the constructor.
+     * The viewport controls the area that is visible in the canvas.  Can either be a single element
+     * or a pair of element where the first is the horizontal viewport and the second is the
+     * vertical viewport.
+     * @param viewport
+     */
     setViewPort(viewport) {
         if(this.viewport) {
             this.viewport[0][0].off("scroll", this.onScroll);
@@ -191,30 +219,58 @@ export class GridDivCanvas {
     //------------------------------------------------------------------------------------------------------------------
     // Properties
 
+    /**
+     * Return the vertical viewport jquery node.
+     * @returns {jQuery}
+     */
     get viewportVertical() {
         return this.viewport[1];
     }
 
+    /**
+     * Returns the horizontal viewport jquery node.
+     * @returns {jQuery}
+     */
     get viewportHorizontal() {
         return this.viewport[0];
     }
 
+    /**
+     * Returns the current DataModel object.
+     * @returns {DataModel}
+     */
     get model() {
         return this.grid.model;
     }
 
+    /**
+     * Returns the number of pixels that the horizontal viewport is scrolling.
+     * @returns {number}
+     */
     get scrollLeft() {
         return this.viewportHorizontal.scrollLeft();
     }
 
+    /**
+     * Returns the number of pixels that the vertical viewport is scrolling.
+     * @returns {number}
+     */
     get scrollTop() {
         return this.viewportVertical.scrollTop();
     }
 
+    /**
+     * Returns the inner width of the horizontal viewport.
+     * @returns {number}
+     */
     get width() {
         return this.viewportHorizontal.innerWidth();
     }
 
+    /**
+     * Returns the inner height of the horizontal viewport.
+     * @returns {number}
+     */
     get height() {
         return this.viewportVertical.innerHeight();
     }
@@ -222,7 +278,10 @@ export class GridDivCanvas {
     //------------------------------------------------------------------------------------------------------------------
     // Event Methods
 
-    onScroll(event) {
+    /**
+     * Handles the scroll events for the viewport.
+     */
+    onScroll() {
         let dx = Math.abs(this._left - this.scrollLeft),
             dy = Math.abs(this._top - this.scrollTop);
 
