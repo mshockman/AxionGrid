@@ -187,6 +187,29 @@ export class DataModel {
 
         return r;
     }
+
+    getRowAt(pos) {
+        try {
+            return this.getRow(Math.floor(pos / this.rowHeight));
+        } catch(e) {
+            return null;
+        }
+    }
+
+    getColAt(pos) {
+        let _pos = 0;
+
+        for(let i = 0, l = this.getColumnLength(); i < l; i++) {
+            let column = this.getColumn(i);
+            _pos += column.width;
+
+            if(_pos > pos) {
+                return column;
+            }
+        }
+
+        return null;
+    }
 }
 
 

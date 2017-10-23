@@ -4349,6 +4349,31 @@ var DataModel = exports.DataModel = function () {
 
             return r;
         }
+    }, {
+        key: "getRowAt",
+        value: function getRowAt(pos) {
+            try {
+                return this.getRow(Math.floor(pos / this.rowHeight));
+            } catch (e) {
+                return null;
+            }
+        }
+    }, {
+        key: "getColAt",
+        value: function getColAt(pos) {
+            var _pos = 0;
+
+            for (var i = 0, l = this.getColumnLength(); i < l; i++) {
+                var column = this.getColumn(i);
+                _pos += column.width;
+
+                if (_pos > pos) {
+                    return column;
+                }
+            }
+
+            return null;
+        }
     }]);
 
     return DataModel;
