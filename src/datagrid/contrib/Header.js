@@ -16,7 +16,7 @@ export class GridHeader {
 
         if(this.scroll) {
             this.grid.subscribe("viewport-change", (viewport) => {
-                this.viewport.scrollLeft(viewport.left);
+                this.viewport.scrollLeft(viewport.scrollLeft);
             });
         }
     }

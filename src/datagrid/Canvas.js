@@ -146,7 +146,7 @@ export class GridDivCanvas {
             rowStart = _row ? _row.rowNumber : 0;
 
             _row = this.model.getRowAt(this.scrollTop + this.height + this.verticalPadding);
-            rowEnd = _row ? _row.rowNumber : rowEnd;
+            rowEnd = _row ? _row.rowNumber : rowEnd - 1;
         }
 
         if(this.virtualization === "both" || this.virtualization === "cell") {
@@ -154,17 +154,17 @@ export class GridDivCanvas {
             cellStartPos = _cell.left;
             cellStart = _cell ? _cell.columnNumber : 0;
 
-            _cell = this.model.getColAt(this.scrollLeft + this.width + this.verticalPadding);
-            cellEnd = _cell ? _cell.columnNumber : cellEnd;
+            _cell = this.model.getColAt(this.scrollLeft + this.width + this.horizontalPadding);
+            cellEnd = _cell ? _cell.columnNumber : cellEnd - 1;
         }
 
         // Generate dom nodes.
-        for(let y = rowStart; y < rowEnd; y++) {
+        for(let y = rowStart; y <= rowEnd; y++) {
             let row = this.model.getRow(y),
                 $row = this.rowRenderer(row),
                 cellPos = cellStartPos;
 
-            for(let x = cellStart; x < cellEnd; x++) {
+            for(let x = cellStart; x <= cellEnd; x++) {
                 let cell = row.getCell(x),
                     $cell = this.cellRenderer(cell);
 
@@ -285,7 +285,7 @@ export class GridDivCanvas {
         let dx = Math.abs(this._left - this.scrollLeft),
             dy = Math.abs(this._top - this.scrollTop);
 
-        if(this.timer && dx > this.speedLimit || dy > this.speedLimit) {
+        if(this.timer && (dx > this.speedLimit || dy > this.speedLimit)) {
             clearTimeout(this.timer);
             this.timer = null;
         }
@@ -293,5 +293,7 @@ export class GridDivCanvas {
         this.timer = setTimeout(() => {
             this.render();
         }, this.refreshRate);
+
+        this.grid.publish("viewport-change", this);
     }
 }
