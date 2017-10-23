@@ -1,6 +1,6 @@
 import {DataModel} from "./DataView";
 import * as util from "./util";
-import {GridDivCanvas, StandardDIVViewPort} from "./Canvas";
+import {GridDivCanvas} from "./Canvas";
 
 import {CheckboxColumn} from "./contrib/CheckboxColumn";
 import {GridHeader, ColumnRow} from "./contrib/Header";
@@ -22,6 +22,5 @@ export {
     InlineFilterBar,
     TextFilter,
     StandardGrid,
-    StandardDIVViewPort,
     ScrollBar,
 };

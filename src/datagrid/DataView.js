@@ -371,8 +371,7 @@ class Cell {
     }
 
     get height() {
-        // todo implement.
-        throw new Error("Not Yet Implemented");
+        return this.parentRow.height;
     }
 
     /**

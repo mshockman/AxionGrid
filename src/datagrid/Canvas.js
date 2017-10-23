@@ -6,14 +6,26 @@ import {clamp} from "../common/util";
 
 
 export class GridDivCanvas {
-    constructor({grid=null, virtualization="row", refreshRate=100, incrementX=20, incrementY=250, verticalPadding=1000, horizontalPadding=1000, speedLimit=1000}={}) {
+    /**
+     *
+     * @param grid
+     * @param virtualization Controls cell and row virtualization.  Can be 'row', 'cell', or 'both'.
+     * @param refreshRate The amount of time after the scroll event is fired that the canvas will refresh.
+     * @param verticalPadding Vertical padding on rendering.  Controls the amount of rows that will be rendered off screen.
+     * @param horizontalPadding Horizontal padding during rendering.  Controls the cells that are rendered off screen.
+     * @param speedLimit Prevents rendering when the user is scrolling faster then the speed limit.  Rendering is differed until the next frame. Speed limit is relative to the refresh rate.
+     * @param viewport Controls the viewport of the canvas.  Defaults it its view wrapper.  Can be a single element or an array of two element representing the horizontal and vertical viewport respectively.
+     */
+    constructor({grid=null, virtualization="row", refreshRate=100, verticalPadding=1000, horizontalPadding=1000, speedLimit=1000, viewport=null}={}) {
         this.virtualization = virtualization;
         this.refreshRate = refreshRate;
-        this.incrementX = incrementX;
-        this.incrementY = incrementY;
         this.verticalPadding = verticalPadding;
         this.horizontalPadding = horizontalPadding;
         this.speedLimit = speedLimit;
+        this.onScroll = this.onScroll.bind(this);
+
+        this._left = 0;
+        this._top = 0;
 
         this.view = $("<div class='grid-viewport'>");
 
@@ -33,7 +45,7 @@ export class GridDivCanvas {
             cell.handleEvent(event);
         });
 
-        this.setViewPortController(new StandardDIVViewPort(this, this.view, this.view));
+        this.setViewPort(this.view);
 
         if(grid) this.setGrid(grid);
     }
@@ -42,127 +54,101 @@ export class GridDivCanvas {
         this.grid = grid;
     }
 
-    setViewPort(x, y, width, height) {
-        this.viewport = {
-            x: x - this.horizontalPadding,
-            y: y - this.verticalPadding,
-            width: width + (this.horizontalPadding*2),
-            height: height + (this.verticalPadding*2),
-            incrementX: this.virtualization === "col" || this.virtualization === "both" ? Math.floor(x / this.incrementX) : 0,
-            incrementY: Math.floor(y / this.incrementY)
-        };
-
-        if(!this._viewport) {
-            this.render();
-            return;
-        }
-
-        if(!this._timer && this.hasChanged()) {
-            let x = this._viewport.x,
-                y = this._viewport.y;
-
-            let onTimeout = () => {
-                let dX = Math.abs(this.viewport.x - x),
-                    dY = Math.abs(this.viewport.y - y);
-
-                if(this.speedLimit && (dX > this.speedLimit || dY > this.speedLimit)) {
-                    x = this.viewport.x;
-                    y = this.viewport.y;
-                    this._timer = setTimeout(onTimeout, this.refreshRate);
-                    return;
-                }
-
-                this._timer = null;
-                if(this.hasChanged()) this.render("scroll");
-            };
-
-            this._timer = setTimeout(onTimeout, this.refreshRate);
-        }
-
-        this.grid.publish("viewport-change", {
-            left: x,
-            top: y,
-            width: width,
-            height: height
-        });
+    appendTo(element) {
+        return this.view.appendTo(element);
     }
 
-    hasChanged() {
-        return this.viewport.width !== this._viewport.width ||
-            this.viewport.height !== this._viewport.height ||
-            this.viewport.incrementX !== this._viewport.incrementX ||
-            this.viewport.incrementY !== this._viewport.incrementY;
+    rowRenderer(row) {
+        let $row = $("<div class='grid-row'>").css({
+            position: "absolute",
+            height: row.height,
+            width: row.width,
+            top: row.top
+        });
+
+        $row.addClass(row.classes);
+        $row.attr(row.attributes);
+        $row.css(row.style);
+        $row.data("rowNumber", row.rowNumber);
+        $row.attr("data-row-number", row.rowNumber);
+
+        return $row;
+    }
+
+    cellRenderer(cell) {
+        let $cell = $("<div class='grid-cell'>").css({
+                position: "absolute",
+                width: cell.width,
+                height: cell.height
+            }),
+            formatter = cell.formatter;
+
+        if(formatter) {
+            $cell.append(formatter(cell));
+        } else {
+            $cell.append(cell.value);
+        }
+
+        $cell.data({
+            "cellNumber": cell.cellNumber,
+            "rowNumber": cell.rowNumber
+        });
+
+        $cell.attr("data-cell-number", cell.cellNumber);
+        $cell.css(cell.style);
+        $cell.attr(cell.attributes);
+        $cell.addClass(cell.classes);
+
+        return $cell;
     }
 
     render() {
-        if(!this.viewport) {
-            let v = this.getViewPort();
-            this.setViewPort(v.left, v.top, v.width, v.height);
-        }
+        let rowStart = 0,
+            rowEnd = this.model.getDataLength(),
+            cellStart = 0,
+            cellEnd = this.model.getColumnLength(),
+            frag = document.createDocumentFragment(),
+            cellStartPos = 0;
 
-        let rowRange = this.getRowRange(this.viewport.y, this.viewport.y + this.viewport.height),
-            columnRange = this.getColumnRange(this.viewport.x, this.viewport.x + this.viewport.width),
-            rowPos = 0,
-            totalWidth = this.model.getWidth(),
-            totalHeight = this.model.getHeight(),
-            frag = document.createDocumentFragment();
+        this._left = this.scrollLeft;
+        this._top = this.scrollTop;
 
-        this._viewport = this.viewport;
-
+        // Set canvas properties
         this.canvas.css({
-            height: totalHeight,
-            width: totalWidth
+            height: this.model.getHeight(),
+            width: this.model.getWidth()
         });
 
-        for(let y = rowRange.start; y < rowRange.stop; y++) {
-            let cellPos = 0,
-                row = this.model.getRow(y),
-                top = row.top,
-                rowHeight = row.height,
-                $row = $("<div>").addClass("grid-row").css({
-                    position: "absolute",
-                    top: top,
-                    height: rowHeight,
-                    width: totalWidth
-                });
+        // Get virtualization bounds.
+        if(this.virtualization === "both" || this.virtualization === "row") {
+            let _row = this.model.getRowAt(this.scrollTop - this.verticalPadding);
+            rowStart = _row ? _row.rowNumber : 0;
 
-            $row.addClass(row.classes);
-            $row.attr(row.attributes);
-            $row.css(row.style);
-            $row.data("rowNumber", row.rowNumber);
-            $row.attr("data-row-number", row.rowNumber);
-            rowPos += row.height;
+            _row = this.model.getRowAt(this.scrollTop + this.height + this.verticalPadding);
+            rowEnd = _row ? _row.rowNumber : rowEnd;
+        }
 
-            cellPos = row.getCell(columnRange.start).left;
+        if(this.virtualization === "both" || this.virtualization === "cell") {
+            let _cell = this.model.getColAt(this.scrollLeft - this.horizontalPadding);
+            cellStartPos = _cell.left;
+            cellStart = _cell ? _cell.columnNumber : 0;
 
-            for(let x = columnRange.start; x < columnRange.stop; x++) {
+            _cell = this.model.getColAt(this.scrollLeft + this.width + this.verticalPadding);
+            cellEnd = _cell ? _cell.columnNumber : cellEnd;
+        }
+
+        // Generate dom nodes.
+        for(let y = rowStart; y < rowEnd; y++) {
+            let row = this.model.getRow(y),
+                $row = this.rowRenderer(row),
+                cellPos = cellStartPos;
+
+            for(let x = cellStart; x < cellEnd; x++) {
                 let cell = row.getCell(x),
-                    cellWidth = cell.width,
-                    $cell = $("<div class='grid-cell'>").css({
-                        position: "absolute",
-                        left: cellPos,
-                        width: cellWidth,
-                        height: rowHeight
-                    }),
-                    formatter = cell.formatter;
+                    $cell = this.cellRenderer(cell);
 
-                cellPos += cellWidth;
-
-                if(formatter) {
-                    $cell.append(formatter(cell));
-                } else {
-                    $cell.append(cell.value);
-                }
-
-                $cell.data({
-                    "cellNumber": cell.cellNumber,
-                    "rowNumber": row.rowNumber
-                });
-
-                $cell.attr("data-cell-number", cell.cellNumber);
-                $cell.css(cell.style);
-                $cell.attr(cell.attributes);
-                $cell.addClass(cell.classes);
+                $cell.css('left', cellPos);
+                cellPos += cell.width;
 
                 $row.append($cell);
             }
@@ -170,189 +156,83 @@ export class GridDivCanvas {
             $row.appendTo(frag);
         }
 
+        // Append to document.
         this.canvas.empty();
         this.canvas.append(frag);
     }
 
-    appendTo(element) {
-        return this.view.appendTo(element);
-    }
+    setViewPort(viewport) {
+        if(this.viewport) {
+            this.viewport[0][0].off("scroll", this.onScroll);
 
-    getRowRange(start, stop) {
-        if(this.virtualization === "both" || this.virtualization === "row") {
-            let l = this.model.getDataLength();
-
-            return {
-                start: clamp(Math.floor(start / this.model.rowHeight), 0, l),
-                stop: clamp(Math.floor(stop / this.model.rowHeight), 0, l)
-            };
-        } else {
-            return {
-                start: 0,
-                stop: this.model.getDataLength()
-            };
-        }
-    }
-
-    getColumnRange(start, stop) {
-        let pos = 0,
-            r = {},
-            column,
-            i = 0,
-            l = this.model.getColumnLength();
-
-        r.start = 0;
-        r.stop = l;
-
-        if(!(this.virtualization === "both" || this.virtualization === "col")) {
-            return r;
-        }
-
-        for(; i < l; i++) {
-            column = this.model.getColumn(i);
-            pos += column.width;
-            r.start = i;
-
-            if(pos > start) {
-                i++;
-                break;
+            if(this.viewport[0][0] !== this.viewport[0][1]) {
+                this.viewport[0].off("scroll", this.onScroll);
             }
         }
 
-        for(; i < l; i++) {
-            column = this.model.getColumn(i);
-            pos += column.width;
-            r.stop = i + 1;
+        this.viewport = null;
 
-            if(pos >= stop) {
-                break;
+        if(viewport != null) {
+            if(Array.isArray(viewport)) {
+                this.viewport = [$(viewport[0]), $(viewport[1])];
+            } else {
+                viewport = $(viewport[0]);
+                this.viewport = [viewport, viewport];
+            }
+
+            this.viewport[0].on("scroll", this.onScroll);
+
+            if(this.viewport[0] !== this.viewport[1]) {
+                this.viewport[1].on("scroll", this.onScroll);
             }
         }
-
-        return r;
     }
 
-    setViewPortController(controller) {
-        this.viewportController = controller;
+    //------------------------------------------------------------------------------------------------------------------
+    // Properties
+
+    get viewportVertical() {
+        return this.viewport[1];
     }
 
-    setScroll(left, top) {
-        this.viewportController.setScroll(left, top);
-
-        let viewport = this.viewportController.getViewPort();
-        this.setViewPort(viewport.left, viewport.top, viewport.width, viewport.height);
-    }
-
-    getViewPort() {
-        return this.viewportController.getViewPort();
+    get viewportHorizontal() {
+        return this.viewport[0];
     }
 
     get model() {
         return this.grid.model;
     }
 
-    get viewportWidth() {
-        return this.viewportController.width;
-    }
-
-    get viewportHeight() {
-        return this.viewportController.height;
-    }
-
     get scrollLeft() {
-        return this.viewportController.scrollLeft;
+        return this.viewportHorizontal.scrollLeft();
     }
 
     get scrollTop() {
-        return this.viewportController.scrollTop;
-    }
-
-    get totalWidth() {
-        return this.model.getWidth();
-    }
-
-    get totalHeight() {
-        return this.model.getHeight();
-    }
-}
-
-
-export class StandardDIVViewPort {
-    constructor(canvas, viewportLeft, viewportTop) {
-        this.canvas = canvas;
-        this.viewportLeft = viewportLeft == null ? this.canvas.view : $(viewportLeft);
-        this.viewportTop = viewportTop == null ? this.canvas.view : $(viewportTop);
-        this.onScroll = this.onScroll.bind(this);
-
-        this.viewportLeft.on("scroll", this.onScroll);
-
-        if(this.viewportTop[0] !== this.viewportLeft[0]) {
-            this.viewportTop.on("scroll", this.onScroll);
-        }
-    }
-
-    onScroll() {
-        let viewport = this.getViewPort();
-        this.canvas.setViewPort(viewport.left, viewport.top, viewport.width, viewport.height);
-    }
-
-    getViewPort() {
-        return {
-            left: this.left,
-            top: this.top,
-            width: this.width,
-            height: this.height
-        };
-    }
-
-    setScroll(left=null, top=null) {
-        if(left !== null) this.viewportLeft.scrollLeft(left);
-        if(top !== null) this.viewportTop.scrollTop(top);
-    }
-
-    get left() {
-        let offset = this.canvas.view.offset(),
-            delta;
-
-        // An error with be thrown if trying to get the offset of the window.
-        try {
-            let viewport = this.viewportLeft.offset();
-            delta = viewport.left - offset.left;
-        } catch(err) {
-            delta = -offset.left;
-        }
-
-        return this.viewportLeft.scrollLeft() + delta;
-    }
-
-    get top() {
-        let offset = this.canvas.view.offset(),
-            delta;
-
-        // An error with be thrown if trying to get the offset of the window.
-        try {
-            let viewport = this.viewportTop.offset();
-            delta = viewport.top - offset.top;
-        } catch(err) {
-            delta = -offset.top;
-        }
-
-        return this.viewportTop.scrollTop() + delta;
+        return this.viewportVertical.scrollTop();
     }
 
     get width() {
-        return this.viewportLeft.innerWidth();
+        return this.viewportHorizontal.innerWidth();
     }
 
     get height() {
-        return this.viewportTop.innerHeight();
+        return this.viewportVertical.innerHeight();
     }
 
-    get scrollLeft() {
-        return this.viewportLeft.scrollLeft();
-    }
+    //------------------------------------------------------------------------------------------------------------------
+    // Event Methods
 
-    get scrollTop() {
-        return this.viewportTop.scrollTop();
+    onScroll(event) {
+        let dx = Math.abs(this._left - this.scrollLeft),
+            dy = Math.abs(this._top - this.scrollTop);
+
+        if(this.timer && dx > this.speedLimit || dy > this.speedLimit) {
+            clearTimeout(this.timer);
+            this.timer = null;
+        }
+
+        this.timer = setTimeout(() => {
+            this.render();
+        }, this.refreshRate);
     }
 }
