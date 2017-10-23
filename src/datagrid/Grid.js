@@ -11,14 +11,8 @@ export class BaseGrid extends Publisher {
         this.model = model;
         this.canvas = canvas;
 
-        this.canvas.setDataModel(this.model);
-
-        this._captureEvent = (...args) => {
-            this.publish(...args);
-        };
-
-        this.model.subscribe("*", this._captureEvent);
-        this.canvas.subscribe("*", this._captureEvent);
+        this.canvas.setGrid(this);
+        this.model.setGrid(this);
     }
 
     setColumns(columns) {

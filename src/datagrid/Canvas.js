@@ -3,11 +3,10 @@
  * and passing events that happen to those element to the grid.
  */
 import {clamp} from "../common/util";
-import {Publisher} from "../common/events";
 
-export class GridDivCanvas extends Publisher {
-    constructor({model=null, virtualization="row", refreshRate=100, incrementX=20, incrementY=250, verticalPadding=1000, horizontalPadding=1000, speedLimit=1000}={}) {
-        super();
+
+export class GridDivCanvas {
+    constructor({grid=null, virtualization="row", refreshRate=100, incrementX=20, incrementY=250, verticalPadding=1000, horizontalPadding=1000, speedLimit=1000}={}) {
         this.virtualization = virtualization;
         this.refreshRate = refreshRate;
         this.incrementX = incrementX;
@@ -36,14 +35,11 @@ export class GridDivCanvas extends Publisher {
 
         this.setViewPortController(new StandardDIVViewPort(this, this.view, this.view));
 
-        if(model) this.setDataModel(model);
+        if(grid) this.setGrid(grid);
     }
 
-    setDataModel(model) {
-        /**
-         * @type DataModel
-         */
-        this.model = model;
+    setGrid(grid) {
+        this.grid = grid;
     }
 
     setViewPort(x, y, width, height) {
@@ -83,7 +79,7 @@ export class GridDivCanvas extends Publisher {
             this._timer = setTimeout(onTimeout, this.refreshRate);
         }
 
-        this.publish("viewport-change", {
+        this.grid.publish("viewport-change", {
             left: x,
             top: y,
             width: width,
@@ -249,6 +245,10 @@ export class GridDivCanvas extends Publisher {
 
     getViewPort() {
         return this.viewportController.getViewPort();
+    }
+
+    get model() {
+        return this.grid.model;
     }
 
     get viewportWidth() {

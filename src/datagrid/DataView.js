@@ -1,6 +1,5 @@
 import {coordinateString} from "./util";
 import {clamp} from "../common/util";
-import {Publisher} from "../common/events";
 
 
 /**
@@ -15,9 +14,8 @@ import {Publisher} from "../common/events";
  *
  *
  */
-export class DataModel extends Publisher {
-    constructor({data=null, columns=null, rowHeight=25, defaultColumnWidth=100, minWidth=null, maxWidth=null, pk=null}={}) {
-        super();
+export class DataModel {
+    constructor({grid=null, data=null, columns=null, rowHeight=25, defaultColumnWidth=100, minWidth=null, maxWidth=null, pk=null}={}) {
         this.rowHeight = rowHeight;
         this.defaultColumnWidth = defaultColumnWidth;
         this.minWidth = minWidth;
@@ -31,6 +29,11 @@ export class DataModel extends Publisher {
 
         if(data) this.setData(data);
         if(columns) this.setColumns(columns);
+        if(grid) this.setGrid(grid);
+    }
+
+    setGrid(grid) {
+        this.grid = grid;
     }
 
     /**
@@ -42,7 +45,7 @@ export class DataModel extends Publisher {
         this.rowData.clear();
         this.cellData.clear();
         this.data = data;
-        this.publish("data-change", "data", this);
+        this.grid.publish("data-change", "data", this);
     }
 
     /**
@@ -57,7 +60,7 @@ export class DataModel extends Publisher {
         }
 
         this.columnData.length = columns.length;
-        this.publish("data-change", "columns", this);
+        this.grid.publish("data-change", "columns", this);
     }
 
     /**

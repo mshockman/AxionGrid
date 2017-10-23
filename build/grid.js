@@ -4112,13 +4112,7 @@ var _util = __webpack_require__(127);
 
 var _util2 = __webpack_require__(90);
 
-var _events = __webpack_require__(63);
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /**
  * Model class that stores row, column and cell information.
@@ -4132,11 +4126,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  *
  *
  */
-var DataModel = exports.DataModel = function (_Publisher) {
-    _inherits(DataModel, _Publisher);
-
+var DataModel = exports.DataModel = function () {
     function DataModel() {
         var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            _ref$grid = _ref.grid,
+            grid = _ref$grid === undefined ? null : _ref$grid,
             _ref$data = _ref.data,
             data = _ref$data === undefined ? null : _ref$data,
             _ref$columns = _ref.columns,
@@ -4154,38 +4148,41 @@ var DataModel = exports.DataModel = function (_Publisher) {
 
         _classCallCheck(this, DataModel);
 
-        var _this = _possibleConstructorReturn(this, (DataModel.__proto__ || Object.getPrototypeOf(DataModel)).call(this));
+        this.rowHeight = rowHeight;
+        this.defaultColumnWidth = defaultColumnWidth;
+        this.minWidth = minWidth;
+        this.maxWidth = maxWidth;
+        this.data = null;
+        this.pk = pk;
 
-        _this.rowHeight = rowHeight;
-        _this.defaultColumnWidth = defaultColumnWidth;
-        _this.minWidth = minWidth;
-        _this.maxWidth = maxWidth;
-        _this.data = null;
-        _this.pk = pk;
+        this.rowData = new MetaData();
+        this.cellData = new MetaData();
+        this.columnData = new MetaData();
 
-        _this.rowData = new MetaData();
-        _this.cellData = new MetaData();
-        _this.columnData = new MetaData();
-
-        if (data) _this.setData(data);
-        if (columns) _this.setColumns(columns);
-        return _this;
+        if (data) this.setData(data);
+        if (columns) this.setColumns(columns);
+        if (grid) this.setGrid(grid);
     }
 
-    /**
-     * Sets the model's data property.  The data should be a list of objects that contain the data to display on the grid
-     * or an object that implements the GetItemInterface.
-     * @param data
-     */
-
-
     _createClass(DataModel, [{
+        key: "setGrid",
+        value: function setGrid(grid) {
+            this.grid = grid;
+        }
+
+        /**
+         * Sets the model's data property.  The data should be a list of objects that contain the data to display on the grid
+         * or an object that implements the GetItemInterface.
+         * @param data
+         */
+
+    }, {
         key: "setData",
         value: function setData(data) {
             this.rowData.clear();
             this.cellData.clear();
             this.data = data;
-            this.publish("data-change", "data", this);
+            this.grid.publish("data-change", "data", this);
         }
 
         /**
@@ -4203,7 +4200,7 @@ var DataModel = exports.DataModel = function (_Publisher) {
             }
 
             this.columnData.length = columns.length;
-            this.publish("data-change", "columns", this);
+            this.grid.publish("data-change", "columns", this);
         }
 
         /**
@@ -4355,7 +4352,7 @@ var DataModel = exports.DataModel = function (_Publisher) {
     }]);
 
     return DataModel;
-}(_events.Publisher);
+}();
 
 var Row = function () {
     function Row(model, index) {
@@ -4943,29 +4940,23 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.StandardDIVViewPort = exports.GridDivCanvas = undefined;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * A canvas object is responsible for drawing the currently viewable parts of the data model to the screen and catching
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * and passing events that happen to those element to the grid.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
 
 var _util = __webpack_require__(90);
 
-var _events = __webpack_require__(63);
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * A canvas object is responsible for drawing the currently viewable parts of the data model to the screen and catching
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * and passing events that happen to those element to the grid.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
-
-
-var GridDivCanvas = exports.GridDivCanvas = function (_Publisher) {
-    _inherits(GridDivCanvas, _Publisher);
-
+var GridDivCanvas = exports.GridDivCanvas = function () {
     function GridDivCanvas() {
+        var _this = this;
+
         var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref$model = _ref.model,
-            model = _ref$model === undefined ? null : _ref$model,
+            _ref$grid = _ref.grid,
+            grid = _ref$grid === undefined ? null : _ref$grid,
             _ref$virtualization = _ref.virtualization,
             virtualization = _ref$virtualization === undefined ? "row" : _ref$virtualization,
             _ref$refreshRate = _ref.refreshRate,
@@ -4983,25 +4974,23 @@ var GridDivCanvas = exports.GridDivCanvas = function (_Publisher) {
 
         _classCallCheck(this, GridDivCanvas);
 
-        var _this = _possibleConstructorReturn(this, (GridDivCanvas.__proto__ || Object.getPrototypeOf(GridDivCanvas)).call(this));
+        this.virtualization = virtualization;
+        this.refreshRate = refreshRate;
+        this.incrementX = incrementX;
+        this.incrementY = incrementY;
+        this.verticalPadding = verticalPadding;
+        this.horizontalPadding = horizontalPadding;
+        this.speedLimit = speedLimit;
 
-        _this.virtualization = virtualization;
-        _this.refreshRate = refreshRate;
-        _this.incrementX = incrementX;
-        _this.incrementY = incrementY;
-        _this.verticalPadding = verticalPadding;
-        _this.horizontalPadding = horizontalPadding;
-        _this.speedLimit = speedLimit;
+        this.view = $("<div class='grid-viewport'>");
 
-        _this.view = $("<div class='grid-viewport'>");
-
-        _this.canvas = $("<div>").addClass("grid-canvas").css({
+        this.canvas = $("<div>").addClass("grid-canvas").css({
             position: "relative"
         });
 
-        _this.canvas.appendTo(_this.view);
+        this.canvas.appendTo(this.view);
 
-        _this.canvas.on("change click", function (event) {
+        this.canvas.on("change click", function (event) {
             var $target = $(event.target),
                 $cell = $target.closest(".grid-cell", _this.canvas),
                 x = $cell.data("cellNumber"),
@@ -5011,19 +5000,15 @@ var GridDivCanvas = exports.GridDivCanvas = function (_Publisher) {
             cell.handleEvent(event);
         });
 
-        _this.setViewPortController(new StandardDIVViewPort(_this, _this.view, _this.view));
+        this.setViewPortController(new StandardDIVViewPort(this, this.view, this.view));
 
-        if (model) _this.setDataModel(model);
-        return _this;
+        if (grid) this.setGrid(grid);
     }
 
     _createClass(GridDivCanvas, [{
-        key: "setDataModel",
-        value: function setDataModel(model) {
-            /**
-             * @type DataModel
-             */
-            this.model = model;
+        key: "setGrid",
+        value: function setGrid(grid) {
+            this.grid = grid;
         }
     }, {
         key: "setViewPort",
@@ -5066,7 +5051,7 @@ var GridDivCanvas = exports.GridDivCanvas = function (_Publisher) {
                 this._timer = setTimeout(onTimeout, this.refreshRate);
             }
 
-            this.publish("viewport-change", {
+            this.grid.publish("viewport-change", {
                 left: x,
                 top: y,
                 width: width,
@@ -5239,6 +5224,11 @@ var GridDivCanvas = exports.GridDivCanvas = function (_Publisher) {
             return this.viewportController.getViewPort();
         }
     }, {
+        key: "model",
+        get: function get() {
+            return this.grid.model;
+        }
+    }, {
         key: "viewportWidth",
         get: function get() {
             return this.viewportController.width;
@@ -5271,7 +5261,7 @@ var GridDivCanvas = exports.GridDivCanvas = function (_Publisher) {
     }]);
 
     return GridDivCanvas;
-}(_events.Publisher);
+}();
 
 var StandardDIVViewPort = exports.StandardDIVViewPort = function () {
     function StandardDIVViewPort(canvas, viewportLeft, viewportTop) {
@@ -11357,14 +11347,8 @@ var BaseGrid = exports.BaseGrid = function (_Publisher) {
         _this.model = model;
         _this.canvas = canvas;
 
-        _this.canvas.setDataModel(_this.model);
-
-        _this._captureEvent = function () {
-            _this.publish.apply(_this, arguments);
-        };
-
-        _this.model.subscribe("*", _this._captureEvent);
-        _this.canvas.subscribe("*", _this._captureEvent);
+        _this.canvas.setGrid(_this);
+        _this.model.setGrid(_this);
         return _this;
     }
 
