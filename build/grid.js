@@ -4675,8 +4675,13 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
      * @param grid
      * @param virtualization Controls cell and row virtualization.  Can be 'row', 'cell', or 'both'.
      * @param refreshRate The amount of time after the scroll event is fired that the canvas will refresh.
+     * @param paddingLeft The amount of offscreen content rendered to the left.
+     * @param paddingTop The amount of offscreen content rendered to the right.
+     * @param paddingBottom The amount of offscreen content rendered to the bottom.
+     * @param paddingRight The amount of offscreen content rendered to the right.
      * @param verticalPadding Vertical padding on rendering.  Controls the amount of rows that will be rendered off screen.
      * @param horizontalPadding Horizontal padding during rendering.  Controls the cells that are rendered off screen.
+     * @param padding Used to set both the horizontal and vertical padding.
      * @param speedLimit Prevents rendering when the user is scrolling faster then the speed limit.  Rendering is differed until the next frame. Speed limit is relative to the refresh rate.
      * @param viewport Controls the viewport of the canvas.  Defaults it its view wrapper.  Can be a single element or an array of two element representing the horizontal and vertical viewport respectively.
      */
@@ -4690,10 +4695,20 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
             virtualization = _ref$virtualization === undefined ? "row" : _ref$virtualization,
             _ref$refreshRate = _ref.refreshRate,
             refreshRate = _ref$refreshRate === undefined ? 100 : _ref$refreshRate,
+            _ref$paddingLeft = _ref.paddingLeft,
+            paddingLeft = _ref$paddingLeft === undefined ? 0 : _ref$paddingLeft,
+            _ref$paddingTop = _ref.paddingTop,
+            paddingTop = _ref$paddingTop === undefined ? 0 : _ref$paddingTop,
+            _ref$paddingBottom = _ref.paddingBottom,
+            paddingBottom = _ref$paddingBottom === undefined ? 0 : _ref$paddingBottom,
+            _ref$paddingRight = _ref.paddingRight,
+            paddingRight = _ref$paddingRight === undefined ? 0 : _ref$paddingRight,
             _ref$verticalPadding = _ref.verticalPadding,
-            verticalPadding = _ref$verticalPadding === undefined ? 1000 : _ref$verticalPadding,
+            verticalPadding = _ref$verticalPadding === undefined ? null : _ref$verticalPadding,
             _ref$horizontalPaddin = _ref.horizontalPadding,
-            horizontalPadding = _ref$horizontalPaddin === undefined ? 1000 : _ref$horizontalPaddin,
+            horizontalPadding = _ref$horizontalPaddin === undefined ? null : _ref$horizontalPaddin,
+            _ref$padding = _ref.padding,
+            padding = _ref$padding === undefined ? null : _ref$padding,
             _ref$speedLimit = _ref.speedLimit,
             speedLimit = _ref$speedLimit === undefined ? 1000 : _ref$speedLimit,
             _ref$viewport = _ref.viewport,
@@ -4703,13 +4718,32 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
 
         this.virtualization = virtualization;
         this.refreshRate = refreshRate;
-        this.verticalPadding = verticalPadding;
-        this.horizontalPadding = horizontalPadding;
         this.speedLimit = speedLimit;
         this.onScroll = this.onScroll.bind(this);
+        this.paddingLeft = paddingLeft;
+        this.paddingTop = paddingTop;
+        this.paddingRight = paddingRight;
+        this.paddingBottom = paddingBottom;
 
+        if (padding != null) {
+            this.paddingLeft = this.paddingRight = this.paddingBottom = this.paddingTop = padding;
+        }
+
+        if (verticalPadding != null) {
+            this.paddingTop = this.paddingBottom = verticalPadding;
+        }
+
+        if (horizontalPadding != null) {
+            this.paddingLeft = this.paddingRight = horizontalPadding;
+        }
+
+        // The position of the viewport scrolling when the viewport was last rendered.
         this._left = 0;
         this._top = 0;
+
+        // The current position of the viewport scrolling.
+        this.scrollLeft = 0;
+        this.scrollTop = 0;
 
         this.view = $("<div class='grid-viewport'>");
 
@@ -4825,6 +4859,8 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
     }, {
         key: "render",
         value: function render() {
+            var force = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
             var rowStart = 0,
                 rowEnd = this.model.getDataLength(),
                 cellStart = 0,
@@ -4832,8 +4868,41 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
                 frag = document.createDocumentFragment(),
                 cellStartPos = 0;
 
+            // Save the scroll state that the canvas was last rendered in.
+            // This is used to calculate speed limits for rendering during onScroll.
             this._left = this.scrollLeft;
             this._top = this.scrollTop;
+
+            // Get the row and cell start and stop bounds for rendering.
+            // This is only used if virtualization is enabled by setting the virtualization
+            // property to one of the valid values.  Otherwise the start and end values are
+            // set to 0, length-1 respectively and every row and cell is rendered reguardless
+            // of the viewport.
+
+            // Get virtualization bounds.
+            if (this.virtualization === "both" || this.virtualization === "row") {
+                var _row = this.model.getRowAt(this.scrollTop - this.paddingTop);
+                rowStart = _row ? _row.rowNumber : 0;
+
+                _row = this.model.getRowAt(this.scrollTop + this.height + this.paddingBottom);
+                rowEnd = _row ? _row.rowNumber : rowEnd - 1;
+            }
+
+            if (this.virtualization === "both" || this.virtualization === "cell") {
+                var _cell = this.model.getColAt(this.scrollLeft - this.paddingLeft);
+                cellStartPos = _cell.left;
+                cellStart = _cell ? _cell.columnNumber : 0;
+
+                _cell = this.model.getColAt(this.scrollLeft + this.width + this.paddingRight);
+                cellEnd = _cell ? _cell.columnNumber : cellEnd - 1;
+            }
+
+            // The force flag is used to force the render function to refresh the canvas even
+            // if the position has not changed.
+            if (this._rowStart === rowStart && this._rowEnd === rowEnd && this._cellStart === cellStart && this._cellEnd === cellEnd && force !== true) {
+                // Nothing has changed don't render.
+                return;
+            }
 
             // Set canvas properties
             this.canvas.css({
@@ -4841,25 +4910,13 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
                 width: this.model.getWidth()
             });
 
-            // Get virtualization bounds.
-            if (this.virtualization === "both" || this.virtualization === "row") {
-                var _row = this.model.getRowAt(this.scrollTop - this.verticalPadding);
-                rowStart = _row ? _row.rowNumber : 0;
+            // Save the current render state so we can compare of efficiency.
+            this._rowStart = rowStart;
+            this._rowEnd = rowEnd;
+            this._cellStart = cellStart;
+            this._cellEnd = cellEnd;
 
-                _row = this.model.getRowAt(this.scrollTop + this.height + this.verticalPadding);
-                rowEnd = _row ? _row.rowNumber : rowEnd - 1;
-            }
-
-            if (this.virtualization === "both" || this.virtualization === "cell") {
-                var _cell = this.model.getColAt(this.scrollLeft - this.horizontalPadding);
-                cellStartPos = _cell.left;
-                cellStart = _cell ? _cell.columnNumber : 0;
-
-                _cell = this.model.getColAt(this.scrollLeft + this.width + this.horizontalPadding);
-                cellEnd = _cell ? _cell.columnNumber : cellEnd - 1;
-            }
-
-            // Generate dom nodes.
+            // Render the dom node clear the canvas and to the screen.
             for (var y = rowStart; y <= rowEnd; y++) {
                 var row = this.model.getRow(y),
                     $row = this.rowRenderer(row),
@@ -4941,6 +4998,9 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
         value: function onScroll() {
             var _this2 = this;
 
+            this.scrollLeft = this.viewportHorizontal.scrollLeft();
+            this.scrollTop = this.viewportVertical.scrollTop();
+
             var dx = Math.abs(this._left - this.scrollLeft),
                 dy = Math.abs(this._top - this.scrollTop);
 
@@ -4950,7 +5010,8 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
             }
 
             this.timer = setTimeout(function () {
-                _this2.render();
+                _this2.render(false);
+                _this2.timer = null;
             }, this.refreshRate);
 
             this.grid.publish("viewport-change", this);
@@ -4981,28 +5042,6 @@ var GridDivCanvas = exports.GridDivCanvas = function () {
         key: "model",
         get: function get() {
             return this.grid.model;
-        }
-
-        /**
-         * Returns the number of pixels that the horizontal viewport is scrolling.
-         * @returns {number}
-         */
-
-    }, {
-        key: "scrollLeft",
-        get: function get() {
-            return this.viewportHorizontal.scrollLeft();
-        }
-
-        /**
-         * Returns the number of pixels that the vertical viewport is scrolling.
-         * @returns {number}
-         */
-
-    }, {
-        key: "scrollTop",
-        get: function get() {
-            return this.viewportVertical.scrollTop();
         }
 
         /**

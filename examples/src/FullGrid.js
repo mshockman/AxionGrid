@@ -11,12 +11,11 @@ export class FullGrid extends BaseGrid {
         let model = new DataModel(),
             canvas = new GridDivCanvas({
                 model: model,
-                virtualization: "both"
+                virtualization: "both",
+                padding: 1000
             });
 
         super(model, canvas);
-
-        // canvas.setViewPortController(new StandardDIVViewPort(canvas, canvas.view, window));
 
         this.endpoint = endpoint;
         this.definations = columns;
@@ -32,18 +31,9 @@ export class FullGrid extends BaseGrid {
         this.template();
         this.view.appendTo(container);
 
-        // this.hScrollBar = new ScrollBar("horizontal");
-        // this.hScrollBar.setPosition(0);
-
-        // this.hScrollBar.subscribe("scroll", (pos) => {
-        //     this.canvas.setScroll(pos, null);
-        // });
-
         this.view.find(".grid-header-wrapper").append(this.headerRow.view);
         this.view.find(".data-grid").append(this.canvas.view);
         this.footer = this.view.find(".grid-footer");
-
-        // this.footer.append(this.hScrollBar.view);
     }
 
     template() {

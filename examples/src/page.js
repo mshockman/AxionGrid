@@ -123,5 +123,5 @@ class TestGrid extends FullGrid {
 
 
 window.addEventListener("load", () => {
-    new TestGrid("#container", null);
+    window.t = new TestGrid("#container", null);
 });
