@@ -1,6 +1,6 @@
 {
   "name": "axion2",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "dependencies": {
@@ -19,7 +19,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack -w",
     "scss": "sass sass/querybuilder.scss dist/css/querybuilder.css",
-    "watch-css": "sass --watch examples/scss/grid.scss:examples/dist/grid.css"
+    "watch-css": "sass --watch examples/amgrid/sass/main.scss"
   },
   "author": "",
   "license": "ISC"

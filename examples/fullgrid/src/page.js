@@ -1,5 +1,5 @@
 import {FullGrid} from './FullGrid';
-import {randomChoice} from "../../src/common/util";
+import {randomChoice} from "../../../src/common/util";
 
 
 let itemCount = 0;

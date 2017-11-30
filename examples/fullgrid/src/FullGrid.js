@@ -1,9 +1,9 @@
-import {BaseGrid} from "../../src/datagrid/Grid";
-import {DataModel} from "../../src/datagrid/DataView";
-import {GridDivCanvas, StandardDIVViewPort} from "../../src/datagrid/Canvas";
-import {CheckboxColumn} from "../../src/datagrid/contrib/CheckboxColumn";
-import {ScrollBar} from "../../src/datagrid/contrib/ScrollBar";
-import {GridHeader, ColumnRow} from "../../src/datagrid/contrib/Header";
+import {BaseGrid} from "../../../src/datagrid/Grid";
+import {DataModel} from "../../../src/datagrid/DataView";
+import {GridDivCanvas, StandardDIVViewPort} from "../../../src/datagrid/Canvas";
+import {CheckboxColumn} from "../../../src/datagrid/contrib/CheckboxColumn";
+import {ScrollBar} from "../../../src/datagrid/contrib/ScrollBar";
+import {GridHeader, ColumnRow} from "../../../src/datagrid/contrib/Header";
 
 
 export class FullGrid extends BaseGrid {

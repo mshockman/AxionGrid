@@ -45,7 +45,7 @@ module.exports = [
     },
 
     {
-        entry: ["babel-polyfill", "./examples/src/page.js"],
+        entry: ["babel-polyfill", "./examples/fullgrid/src/page.js"],
 
         devtool: "source-map",
 
