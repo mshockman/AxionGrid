@@ -210,6 +210,12 @@ export class DataModel {
 
         return null;
     }
+
+    *iterateColumns() {
+        for(let i = 0, l = this.getColumnLength(); i < l; i++) {
+            yield this.getColumn(i);
+        }
+    }
 }
 
 
@@ -344,7 +350,7 @@ class Cell {
     }
 
     get id() {
-        return this.parentColumn.getMetaData("id");
+        return this.parentColumn.id;
     }
 
     get left() {
@@ -417,6 +423,10 @@ class Column {
         }
 
         return label;
+    }
+
+    get id() {
+        return this.getMetaData("id");
     }
 
     /**
@@ -541,6 +551,14 @@ class Column {
 
     set width(value) {
         this.setMetaData("width", clamp(value, this.minWidth, this.maxWidth));
+    }
+
+    get(name) {
+        return this.data[name];
+    }
+
+    set(name, value) {
+        this.data[name] = value;
     }
 }
 

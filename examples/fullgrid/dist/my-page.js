@@ -4061,37 +4061,6 @@ var DataModel = exports.DataModel = function () {
 
             return null;
         }
-    }, {
-        key: "iterateColumns",
-        value: /*#__PURE__*/regeneratorRuntime.mark(function iterateColumns() {
-            var i, l;
-            return regeneratorRuntime.wrap(function iterateColumns$(_context) {
-                while (1) {
-                    switch (_context.prev = _context.next) {
-                        case 0:
-                            i = 0, l = this.getColumnLength();
-
-                        case 1:
-                            if (!(i < l)) {
-                                _context.next = 7;
-                                break;
-                            }
-
-                            _context.next = 4;
-                            return this.getColumn(i);
-
-                        case 4:
-                            i++;
-                            _context.next = 1;
-                            break;
-
-                        case 7:
-                        case "end":
-                            return _context.stop();
-                    }
-                }
-            }, iterateColumns, this);
-        })
     }]);
 
     return DataModel;
@@ -4260,7 +4229,7 @@ var Cell = function () {
     }, {
         key: "id",
         get: function get() {
-            return this.parentColumn.id;
+            return this.parentColumn.getMetaData("id");
         }
     }, {
         key: "left",
@@ -4386,16 +4355,6 @@ var Column = function () {
          */
 
     }, {
-        key: "get",
-        value: function get(name) {
-            return this.data[name];
-        }
-    }, {
-        key: "set",
-        value: function set(name, value) {
-            this.data[name] = value;
-        }
-    }, {
         key: "label",
         get: function get() {
             var label = this.getMetaData("label") || "";
@@ -4405,11 +4364,6 @@ var Column = function () {
             }
 
             return label;
-        }
-    }, {
-        key: "id",
-        get: function get() {
-            return this.getMetaData("id");
         }
     }, {
         key: "style",

@@ -4,7 +4,7 @@ import {GridDivCanvas} from "./Canvas";
 
 import {CheckboxColumn} from "./contrib/CheckboxColumn";
 import {GridHeader, ColumnRow} from "./contrib/Header";
-import {InlineFilterBar, TextFilter} from "./contrib/InlineFilters";
+import {InlineFilterBar, InputTextFilter, OperatorTextFilter} from "./contrib/InlineFilters";
 
 import {BaseGrid, StandardGrid} from './Grid';
 
@@ -20,7 +20,8 @@ export {
     GridHeader,
     ColumnRow,
     InlineFilterBar,
-    TextFilter,
+    InputTextFilter,
     StandardGrid,
     ScrollBar,
+    OperatorTextFilter,
 };
