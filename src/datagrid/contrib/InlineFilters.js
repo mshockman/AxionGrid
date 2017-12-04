@@ -87,9 +87,13 @@ export class InlineFilterBar extends Publisher {
 
 
 export class InputTextFilter {
-    constructor() {
+    constructor(placeholder='Search') {
         this.view = $("<div class='input-text-filter inline-filter-item'>");
         this.input = $("<input type='text'>");
+
+        if(placeholder) {
+            this.input.attr("placeholder", placeholder);
+        }
 
         this.view.append(this.input);
     }
@@ -125,7 +129,7 @@ export class OperatorTextFilter {
         ["Is Not Empty", "not_empty", false, false]
     ];
 
-    constructor(operators=OperatorTextFilter.DEFAULT_OPERATORS) {
+    constructor(operators=OperatorTextFilter.DEFAULT_OPERATORS, placeholder="Search") {
         this.view = $("<div class='operator-text-filter'>");
         this.operators = {};
 
@@ -149,6 +153,10 @@ export class OperatorTextFilter {
 
         this.text = $("<input type='text'>");
         this.view.append(this.select, this.text);
+
+        if(placeholder) {
+            this.text.attr("placeholder", this.text);
+        }
 
         this.select.on("change", () => {
             let value = this.select.val(),
@@ -193,14 +201,14 @@ export class OperatorTextFilter {
 
 
 export class NumberRangeFilter {
-    constructor() {
+    constructor(startPlaceholder="Start", endPlaceholder="End") {
         this.view = $("<div class='number-range-filter inline-filter-item'>");
 
         let startWrapper = $("<div class='start-wrapper'>"),
             endWrapper = $("<div class='end-wrapper'>");
 
-        this.start = $("<input type='number' placeholder='Start'>");
-        this.end = $("<input type='number' placeholder='End'>");
+        this.start = $(`<input type='number' placeholder='${startPlaceholder}'>`);
+        this.end = $(`<input type='number' placeholder='${endPlaceholder}'>`);
 
         startWrapper.append(this.start);
         endWrapper.append(this.end);
