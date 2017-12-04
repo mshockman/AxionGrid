@@ -88,7 +88,7 @@ export class InlineFilterBar extends Publisher {
 
 export class InputTextFilter {
     constructor() {
-        this.view = $("<div class='input-text-filter'>");
+        this.view = $("<div class='input-text-filter inline-filter-item'>");
         this.input = $("<input type='text'>");
 
         this.view.append(this.input);
@@ -194,12 +194,19 @@ export class OperatorTextFilter {
 
 export class NumberRangeFilter {
     constructor() {
-        this.view = $("<div class='number-range-filter'>");
-        this.start = $("<input type='number'>");
-        this.end = $("<input type='number'>");
+        this.view = $("<div class='number-range-filter inline-filter-item'>");
 
-        this.view.append(this.start);
-        this.view.append(this.end);
+        let startWrapper = $("<div class='start-wrapper'>"),
+            endWrapper = $("<div class='end-wrapper'>");
+
+        this.start = $("<input type='number' placeholder='Start'>");
+        this.end = $("<input type='number' placeholder='End'>");
+
+        startWrapper.append(this.start);
+        endWrapper.append(this.end);
+
+        this.view.append(startWrapper);
+        this.view.append(endWrapper);
     }
 
     appendTo(element) {
