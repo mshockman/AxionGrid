@@ -11381,7 +11381,16 @@ var InlineFilterBar = exports.InlineFilterBar = function (_Publisher) {
                     var filter = column.get("inlineFilter");
 
                     if (filter && column.id) {
+                        var value = filter.getFilter();
                         r[column.id] = filter.getFilter();
+
+                        if (value !== null) {
+                            r[column.id] = {
+                                value: value,
+                                filter: filter,
+                                column: column
+                            };
+                        }
                     }
                 }
             } catch (err) {

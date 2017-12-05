@@ -77,9 +77,8 @@ export class InlineFilterBar extends Publisher {
 
             if(filter && column.id) {
                 let value = filter.getFilter();
-                r[column.id] = filter.getFilter();
 
-                if(value !== null) {
+                if(value !== null && value !== undefined) {
                     r[column.id] = {
                         value: value,
                         filter: filter,
