@@ -5170,19 +5170,26 @@ var ColumnRow = exports.ColumnRow = function () {
         value: function initSorting() {
             var _this4 = this;
 
-            this.view.find(".grid-column").addClass(this.sortingStates[0]).data("sortState", 0);
+            this.view.find(".grid-column").addClass(this.sortingStates[0]);
 
             this.view.on("click", function (event) {
-                var $column = $(event.target).closest(".grid-column", _this4.view);
+                var $column = $(event.target).closest(".grid-column", _this4.view),
+                    column = $column.data("column");
 
-                if (!$column.length || !$column.data("column").data.dataSortable) {
+                if (!$column.length || !column.data.dataSortable) {
                     return;
                 }
 
-                var sortState = $column.data("sortState") || 0;
+                var sortState = column.data.sortState || 0;
 
                 if (!_this4.multiSort) {
-                    _this4.view.find(".sort-asc, sort-desc").not($column).removeClass('sort-asc').removeClass('sort-desc').addClass('sort-none').data("sortState", 0);
+                    _this4.view.find(".sort-asc, .sort-desc").not($column).each(function (x, node) {
+                        var $column = $(node),
+                            column = $column.data("column");
+                        column.data.sortState = 0;
+                        $column.removeClass("sort-asc sort-desc");
+                        $column.addClass("sort-none");
+                    });
                 }
 
                 $column.removeClass(_this4.sortingStates[sortState]);
@@ -5193,16 +5200,18 @@ var ColumnRow = exports.ColumnRow = function () {
                     sortState = 0;
                 }
 
-                $column.addClass(_this4.sortingStates[sortState]).data("sortState", sortState);
+                $column.addClass(_this4.sortingStates[sortState]);
+                column.data.sortState = sortState;
 
                 if (_this4.grid) {
-                    var column = $column.data("column");
+                    var _column = $column.data("column");
                     _this4.grid.publish("data-sort", {
                         row: _this4,
-                        column: column,
+                        column: _column,
                         node: $column,
                         state: _this4.sortMap[_this4.sortingStates[sortState]],
-                        id: column.id
+                        stateId: sortState,
+                        id: _column.id
                     }, _this4.getAllSortingStates());
                 }
             });
@@ -5248,8 +5257,8 @@ var ColumnRow = exports.ColumnRow = function () {
                     $column.addClass("ui-sortable");
                 }
 
-                if (this.dataSortable && column.getMetaData("dataSortable")) {
-                    $column.addClass(this.sortingStates[column.getMetaData("dataSort") || 0]);
+                if (this.dataSortable && column.data.dataSortable) {
+                    $column.addClass(this.sortingStates[column.data.sortState || 0]);
                 }
 
                 $column.addClass(column.classes);

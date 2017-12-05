@@ -97,19 +97,26 @@ export class ColumnRow {
     }
 
     initSorting() {
-        this.view.find(".grid-column").addClass(this.sortingStates[0]).data("sortState", 0);
+        this.view.find(".grid-column").addClass(this.sortingStates[0]);
 
         this.view.on("click", (event) => {
-            let $column = $(event.target).closest(".grid-column", this.view);
+            let $column = $(event.target).closest(".grid-column", this.view),
+                column = $column.data("column");
 
-            if(!$column.length || !$column.data("column").data.dataSortable) {
+            if(!$column.length || !column.data.dataSortable) {
                 return;
             }
 
-            let sortState = $column.data("sortState") || 0;
+            let sortState = column.data.sortState || 0;
 
             if(!this.multiSort) {
-                this.view.find(".sort-asc, sort-desc").not($column).removeClass('sort-asc').removeClass('sort-desc').addClass('sort-none').data("sortState", 0);
+                this.view.find(".sort-asc, .sort-desc").not($column).each(function(x, node) {
+                    let $column = $(node),
+                        column = $column.data("column");
+                    column.data.sortState = 0;
+                    $column.removeClass("sort-asc sort-desc");
+                    $column.addClass("sort-none");
+                });
             }
 
             $column.removeClass(this.sortingStates[sortState]);
@@ -120,7 +127,8 @@ export class ColumnRow {
                 sortState = 0;
             }
 
-            $column.addClass(this.sortingStates[sortState]).data("sortState", sortState);
+            $column.addClass(this.sortingStates[sortState]);
+            column.data.sortState = sortState;
 
             if(this.grid) {
                 let column = $column.data("column");
@@ -129,6 +137,7 @@ export class ColumnRow {
                     column: column,
                     node: $column,
                     state: this.sortMap[this.sortingStates[sortState]],
+                    stateId: sortState,
                     id: column.id
                 }, this.getAllSortingStates());
             }
@@ -175,8 +184,8 @@ export class ColumnRow {
                 $column.addClass("ui-sortable");
             }
 
-            if(this.dataSortable && column.getMetaData("dataSortable")) {
-                $column.addClass(this.sortingStates[column.getMetaData("dataSort") || 0]);
+            if(this.dataSortable && column.data.dataSortable) {
+                $column.addClass(this.sortingStates[column.data.sortState || 0]);
             }
 
             $column.addClass(column.classes);
