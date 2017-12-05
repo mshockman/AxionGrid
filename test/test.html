@@ -241,6 +241,10 @@
             console.log(state);
             g.render();
         });
+
+        g.subscribe("data-sort", function() {
+            console.dir(arguments);
+        });
     </script>
 
     <br><br><h3>Test</h3>

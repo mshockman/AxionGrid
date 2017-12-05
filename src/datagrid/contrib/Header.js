@@ -36,10 +36,11 @@ export class GridHeader {
 
 
 export class ColumnRow {
-    constructor(grid, {draggable=true, resizeable=true, dataSortable=false}={}) {
+    constructor(grid, {draggable=true, resizeable=true, dataSortable=false, multiSort=false}={}) {
         this.draggable = draggable;
         this.dataSortable = dataSortable;
         this.sortingStates = ["sort-none", "sort-asc", "sort-desc"];
+        this.multiSort = multiSort;
 
         this.sortMap = {
             "sort-none": null,
@@ -96,36 +97,61 @@ export class ColumnRow {
     }
 
     initSorting() {
-        this.view.find(".grid-column").addClass(this.sortingStates[0]);
+        this.view.find(".grid-column").addClass(this.sortingStates[0]).data("sortState", 0);
 
         this.view.on("click", (event) => {
             let $column = $(event.target).closest(".grid-column", this.view);
 
-            if(!$column.length) {
+            if(!$column.length || !$column.data("column").data.dataSortable) {
                 return;
             }
 
-            let column = this.grid.model.getColumn($column.data('columnNumber')),
-                sortState = column.getMetaData("dataSort") || 0;
+            let sortState = $column.data("sortState") || 0;
 
-            if(!column.getMetaData("dataSortable")) {
-                return;
+            if(!this.multiSort) {
+                this.view.find(".sort-asc, sort-desc").not($column).removeClass('sort-asc').removeClass('sort-desc').addClass('sort-none').data("sortState", 0);
             }
 
             $column.removeClass(this.sortingStates[sortState]);
+
             sortState++;
 
-            if(sortState > 2) {
+            if(sortState > this.sortingStates.length-1) {
                 sortState = 0;
             }
 
-            $column.addClass(this.sortingStates[sortState]);
-            column.setMetaData("dataSort", sortState);
+            $column.addClass(this.sortingStates[sortState]).data("sortState", sortState);
 
             if(this.grid) {
-                this.grid.publish("data-sort", this.sortMap[this.sortingStates[sortState]], column);
+                let column = $column.data("column");
+                this.grid.publish("data-sort", {
+                    row: this,
+                    column: column,
+                    node: $column,
+                    state: this.sortMap[this.sortingStates[sortState]],
+                    id: column.id
+                }, this.getAllSortingStates());
             }
         });
+    }
+
+    getAllSortingStates() {
+        let r = {};
+
+        this.view.find(".grid-column").each((x, item) => {
+            item = $(item);
+            let column = item.data("column");
+
+            if(column.data.dataSortable) {
+                let id = column.data.id,
+                    state = item.data("sortState");
+
+                state = this.sortMap[this.sortingStates[state]];
+                if(state) r[id] = state;
+            }
+        });
+
+        return r;
     }
 
     get model() {
@@ -158,7 +184,8 @@ export class ColumnRow {
             $column.css(column.style);
             $column.data({
                 "columnNumber": column.columnNumber,
-                "grid": this.grid
+                "grid": this.grid,
+                "column": column
             });
 
             $column.css({

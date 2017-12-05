@@ -5095,13 +5095,16 @@ var ColumnRow = exports.ColumnRow = function () {
             _ref$resizeable = _ref.resizeable,
             resizeable = _ref$resizeable === undefined ? true : _ref$resizeable,
             _ref$dataSortable = _ref.dataSortable,
-            dataSortable = _ref$dataSortable === undefined ? false : _ref$dataSortable;
+            dataSortable = _ref$dataSortable === undefined ? false : _ref$dataSortable,
+            _ref$multiSort = _ref.multiSort,
+            multiSort = _ref$multiSort === undefined ? false : _ref$multiSort;
 
         _classCallCheck(this, ColumnRow);
 
         this.draggable = draggable;
         this.dataSortable = dataSortable;
         this.sortingStates = ["sort-none", "sort-asc", "sort-desc"];
+        this.multiSort = multiSort;
 
         this.sortMap = {
             "sort-none": null,
@@ -5167,36 +5170,64 @@ var ColumnRow = exports.ColumnRow = function () {
         value: function initSorting() {
             var _this4 = this;
 
-            this.view.find(".grid-column").addClass(this.sortingStates[0]);
+            this.view.find(".grid-column").addClass(this.sortingStates[0]).data("sortState", 0);
 
             this.view.on("click", function (event) {
                 var $column = $(event.target).closest(".grid-column", _this4.view);
 
-                if (!$column.length) {
+                if (!$column.length || !$column.data("column").data.dataSortable) {
                     return;
                 }
 
-                var column = _this4.grid.model.getColumn($column.data('columnNumber')),
-                    sortState = column.getMetaData("dataSort") || 0;
+                var sortState = $column.data("sortState") || 0;
 
-                if (!column.getMetaData("dataSortable")) {
-                    return;
+                if (!_this4.multiSort) {
+                    _this4.view.find(".sort-asc, sort-desc").not($column).removeClass('sort-asc').removeClass('sort-desc').addClass('sort-none').data("sortState", 0);
                 }
 
                 $column.removeClass(_this4.sortingStates[sortState]);
+
                 sortState++;
 
-                if (sortState > 2) {
+                if (sortState > _this4.sortingStates.length - 1) {
                     sortState = 0;
                 }
 
-                $column.addClass(_this4.sortingStates[sortState]);
-                column.setMetaData("dataSort", sortState);
+                $column.addClass(_this4.sortingStates[sortState]).data("sortState", sortState);
 
                 if (_this4.grid) {
-                    _this4.grid.publish("data-sort", _this4.sortMap[_this4.sortingStates[sortState]], column);
+                    var column = $column.data("column");
+                    _this4.grid.publish("data-sort", {
+                        row: _this4,
+                        column: column,
+                        node: $column,
+                        state: _this4.sortMap[_this4.sortingStates[sortState]],
+                        id: column.id
+                    }, _this4.getAllSortingStates());
                 }
             });
+        }
+    }, {
+        key: "getAllSortingStates",
+        value: function getAllSortingStates() {
+            var _this5 = this;
+
+            var r = {};
+
+            this.view.find(".grid-column").each(function (x, item) {
+                item = $(item);
+                var column = item.data("column");
+
+                if (column.data.dataSortable) {
+                    var id = column.data.id,
+                        state = item.data("sortState");
+
+                    state = _this5.sortMap[_this5.sortingStates[state]];
+                    if (state) r[id] = state;
+                }
+            });
+
+            return r;
         }
     }, {
         key: "render",
@@ -5226,7 +5257,8 @@ var ColumnRow = exports.ColumnRow = function () {
                 $column.css(column.style);
                 $column.data({
                     "columnNumber": column.columnNumber,
-                    "grid": this.grid
+                    "grid": this.grid,
+                    "column": column
                 });
 
                 $column.css({
@@ -5267,7 +5299,7 @@ var ColumnRow = exports.ColumnRow = function () {
     }, {
         key: "startResize",
         value: function startResize(event) {
-            var _this5 = this;
+            var _this6 = this;
 
             var $eventTarget = $(event.target),
                 handle = $eventTarget.closest(".ui-resize-handle", this.view),
@@ -5283,20 +5315,20 @@ var ColumnRow = exports.ColumnRow = function () {
                 column = this.model.getColumn($column.data("columnNumber"));
 
             var onMouseMove = function onMouseMove(event) {
-                _this5._modColumnWidths(originalWidths, column, event.clientX - startX);
+                _this6._modColumnWidths(originalWidths, column, event.clientX - startX);
                 event.preventDefault();
-                _this5.refresh(false);
-                _this5.grid.publish("col-resize");
+                _this6.refresh(false);
+                _this6.grid.publish("col-resize");
             };
 
             var onMouseUp = function onMouseUp(event) {
                 $doc.off("mousemove", onMouseMove);
                 $doc.off("mouseup", onMouseUp);
 
-                _this5._modColumnWidths(originalWidths, column, event.clientX - startX);
-                _this5.refresh(true);
-                _this5.grid.render();
-                _this5.grid.publish("refresh");
+                _this6._modColumnWidths(originalWidths, column, event.clientX - startX);
+                _this6.refresh(true);
+                _this6.grid.render();
+                _this6.grid.publish("refresh");
             };
 
             $doc.on("mousemove", onMouseMove);
@@ -5335,7 +5367,7 @@ var ColumnRow = exports.ColumnRow = function () {
     }, {
         key: "refresh",
         value: function refresh() {
-            var _this6 = this;
+            var _this7 = this;
 
             var updateViewWidth = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 
@@ -5347,7 +5379,7 @@ var ColumnRow = exports.ColumnRow = function () {
 
             $columns.each(function (index, element) {
                 var $column = $(element),
-                    column = _this6.model.getColumn($column.data("columnNumber")),
+                    column = _this7.model.getColumn($column.data("columnNumber")),
                     width = column.width;
 
                 $column.css({
@@ -5358,7 +5390,7 @@ var ColumnRow = exports.ColumnRow = function () {
     }, {
         key: "applySort",
         value: function applySort() {
-            var _this7 = this;
+            var _this8 = this;
 
             var $columns = this.view.find(".grid-column"),
                 definitions = [],
@@ -5366,7 +5398,7 @@ var ColumnRow = exports.ColumnRow = function () {
 
             $columns.each(function (index, element) {
                 var $column = $(element),
-                    column = _this7.model.getColumn($column.data("columnNumber"));
+                    column = _this8.model.getColumn($column.data("columnNumber"));
 
                 $column.data("columnNumber", i++);
 
