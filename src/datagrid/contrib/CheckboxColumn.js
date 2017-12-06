@@ -36,7 +36,7 @@ export class CheckboxColumn {
         this.onChange = function(cell, event) {
             let val = $(event.target).is(":checked");
 
-            cell.getRow().setMetaData(name, val);
+            cell.parentRow.setMetaData(name, val);
 
             if(!val) {
                 label.prop("checked", false);
