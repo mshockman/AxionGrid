@@ -4931,6 +4931,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 exports.randomChoice = randomChoice;
 exports.clamp = clamp;
 exports.dictsEqual = dictsEqual;
+exports.isEmptyObject = isEmptyObject;
 /**
  * Created by mshoc on 10/10/2017.
  */
@@ -4991,6 +4992,16 @@ function dictsEqual(object1, object2) {
         if (keys2.indexOf(key) === -1) {
             return false;
         } else if (object1[key] !== object2[key]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function isEmptyObject(obj) {
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
             return false;
         }
     }
@@ -11234,7 +11245,7 @@ var CheckboxColumn = exports.CheckboxColumn = function CheckboxColumn(name, opti
     this.onChange = function (cell, event) {
         var val = $(event.target).is(":checked");
 
-        cell.getRow().setMetaData(name, val);
+        cell.parentRow.setMetaData(name, val);
 
         if (!val) {
             label.prop("checked", false);
@@ -11382,9 +11393,8 @@ var InlineFilterBar = exports.InlineFilterBar = function (_Publisher) {
 
                     if (filter && column.id) {
                         var value = filter.getFilter();
-                        r[column.id] = filter.getFilter();
 
-                        if (value !== null) {
+                        if (value !== null && value !== undefined) {
                             r[column.id] = {
                                 value: value,
                                 filter: filter,

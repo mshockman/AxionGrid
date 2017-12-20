@@ -59,5 +59,22 @@ module.exports = [
             path: __dirname + "/examples/dist/",
             filename: "my-page.js"
         }
+    },
+
+    {
+        entry: ["babel-polyfill", "./test/test_menu.js"],
+
+        devtool: "source-map",
+
+        module: {
+            rules: [
+                { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" }
+            ]
+        },
+
+        output: {
+            path: __dirname + "/test/",
+            filename: "test_menu.bundle.js"
+        }
     }
 ];
