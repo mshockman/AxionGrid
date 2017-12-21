@@ -3,6 +3,8 @@
  */
 
 
+import {resolveSelector} from "../common/dom";
+
 export class Menu {
     timeout = 1000;
     delay = false;
@@ -14,7 +16,15 @@ export class Menu {
     multiple = false;
 
     constructor(selector) {
+        this.view = resolveSelector(selector);
 
+        this.onMouseOver = this.onMouseOver.bind(this);
+        this.onMouseOut = this.onMouseOut.bind(this);
+        this.onClick = this.onClick.bind(this);
+
+        this.view.addEventListener("click", this.onClick);
+        this.view.addEventListener("mouseover", this.onMouseOver);
+        this.view.addEventListener("mouseout", this.onMouseOut);
     }
 
     show() {
@@ -34,19 +44,20 @@ export class Menu {
     }
 
     appendTo(selector) {
-
+        let node = resolveSelector(selector);
+        node.appendChild(this.view);
     }
 
     onClick(event) {
-
+        console.log("Click");
     }
 
     onMouseOver(event) {
-
+        console.log("On Mouse Out");
     }
 
     onMouseOut(event) {
-
+        console.log("On Mouse Over.");
     }
 
     getItems() {

@@ -20,7 +20,25 @@ export function parseHTML(html) {
 }
 
 
-class DataCache {
+export function resolveSelectorAll(selector) {
+    if(typeof selector === "string") {
+        return document.querySelectorAll(selector);
+    } else {
+        return selector;
+    }
+}
+
+
+export function resolveSelector(selector) {
+    if(typeof selector === "string") {
+        return document.querySelector(selector);
+    } else {
+        return selector;
+    }
+}
+
+
+export class DataCache {
     static uuid = 0;
 
     constructor() {

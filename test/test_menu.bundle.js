@@ -9038,14 +9038,15 @@ window.addEventListener("load", function () {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.Menu = undefined;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Created by mshoc on 10/10/2017.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+var _dom = __webpack_require__(329);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
- * Created by mshoc on 10/10/2017.
- */
 
 var Menu = exports.Menu = function () {
     function Menu(selector) {
@@ -9057,6 +9058,16 @@ var Menu = exports.Menu = function () {
         this.closeOnClick = false;
         this.closeOnSelect = false;
         this.multiple = false;
+
+        this.view = (0, _dom.resolveSelector)(selector);
+
+        this.onMouseOver = this.onMouseOver.bind(this);
+        this.onMouseOut = this.onMouseOut.bind(this);
+        this.onClick = this.onClick.bind(this);
+
+        this.view.addEventListener("click", this.onClick);
+        this.view.addEventListener("mouseover", this.onMouseOver);
+        this.view.addEventListener("mouseout", this.onMouseOut);
     }
 
     _createClass(Menu, [{
@@ -9073,16 +9084,25 @@ var Menu = exports.Menu = function () {
         value: function deactivate() {}
     }, {
         key: "appendTo",
-        value: function appendTo(selector) {}
+        value: function appendTo(selector) {
+            var node = (0, _dom.resolveSelector)(selector);
+            node.appendChild(this.view);
+        }
     }, {
         key: "onClick",
-        value: function onClick(event) {}
+        value: function onClick(event) {
+            console.log("Click");
+        }
     }, {
         key: "onMouseOver",
-        value: function onMouseOver(event) {}
+        value: function onMouseOver(event) {
+            console.log("On Mouse Out");
+        }
     }, {
         key: "onMouseOut",
-        value: function onMouseOut(event) {}
+        value: function onMouseOut(event) {
+            console.log("On Mouse Over.");
+        }
     }, {
         key: "getItems",
         value: function getItems() {}
@@ -9094,6 +9114,260 @@ var Menu = exports.Menu = function () {
 var Dropdown = function Dropdown() {
     _classCallCheck(this, Dropdown);
 };
+
+/***/ }),
+/* 329 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.DataCache = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Parses an html string into a document fragment.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * @param html
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * @returns {DocumentFragment}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+
+exports.parseHTML = parseHTML;
+exports.resolveSelectorAll = resolveSelectorAll;
+exports.resolveSelector = resolveSelector;
+
+var _util = __webpack_require__(330);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function parseHTML(html) {
+    var div = document.createElement("div"),
+        frag = document.createDocumentFragment();
+
+    div.innerHTML = html;
+
+    for (var i = 0; i < div.children.length; i++) {
+        frag.appendChild(div.children[i]);
+    }
+
+    return frag;
+}
+
+function resolveSelectorAll(selector) {
+    if (typeof selector === "string") {
+        return document.querySelectorAll(selector);
+    } else {
+        return selector;
+    }
+}
+
+function resolveSelector(selector) {
+    if (typeof selector === "string") {
+        return document.querySelector(selector);
+    } else {
+        return selector;
+    }
+}
+
+var DataCache = exports.DataCache = function () {
+    function DataCache() {
+        _classCallCheck(this, DataCache);
+
+        this.expando = "_" + ++DataCache.uuid + "-" + Math.round(Math.random() * 100000);
+    }
+
+    _createClass(DataCache, [{
+        key: "cache",
+        value: function cache(owner) {
+            var value = owner[this.expando];
+
+            if (!value) {
+                value = {};
+
+                if (DataCache.acceptsData(owner)) {
+                    if (owner.nodeType) {
+                        owner[this.expando] = value;
+                    }
+                } else {
+                    Object.defineProperty(owner, this.expando, {
+                        value: value,
+                        configurable: true
+                    });
+                }
+            }
+
+            return value;
+        }
+    }, {
+        key: "get",
+        value: function get(owner, key) {
+            return key === undefined ? this.cache(owner) : owner[this.expando][key];
+        }
+    }, {
+        key: "set",
+        value: function set(owner, data, value) {
+            var cache = this.cache(owner);
+
+            if (typeof data === "string") {
+                cache[data] = value;
+            } else {
+                for (var key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        cache[key] = data[key];
+                    }
+                }
+            }
+
+            return cache;
+        }
+    }, {
+        key: "access",
+        value: function access(owner, key, value) {
+            if (key === undefined || key && typeof key === "string" && value === undefined) {
+                return this.get(owner, key);
+            } else {
+                this.set(owner, key, value);
+                return value !== undefined ? value : key;
+            }
+        }
+    }, {
+        key: "remove",
+        value: function remove(owner, key) {
+            var cache = owner[this.expando]; // Get directly because we don't want to create it if it doesn't exist.
+
+            if (cache === undefined) {
+                return;
+            }
+
+            if (key !== undefined) {
+                if (!Array.isArray(key)) {
+                    key = [key];
+                }
+
+                var i = key.length;
+
+                while (i--) {
+                    delete cache[key[i]];
+                }
+            }
+
+            if (key === undefined || (0, _util.isEmptyObject)(cache)) {
+                if (owner.nodeType) {
+                    owner[this.expando] = undefined;
+                } else {
+                    delete owner[this.expando];
+                }
+            }
+        }
+    }], [{
+        key: "acceptsData",
+        value: function acceptsData(owner) {
+            if (owner) {
+                return owner.nodeType === 1 || owner.nodeType === 9 || !owner.nodeType;
+            }
+        }
+    }]);
+
+    return DataCache;
+}();
+
+DataCache.uuid = 0;
+
+/***/ }),
+/* 330 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+exports.randomChoice = randomChoice;
+exports.clamp = clamp;
+exports.dictsEqual = dictsEqual;
+exports.isEmptyObject = isEmptyObject;
+/**
+ * Created by mshoc on 10/10/2017.
+ */
+
+/**
+ * Chooses a random choice from an array.
+ * @param array
+ * @return {*}
+ */
+function randomChoice(array) {
+    var c = Math.floor(Math.random() * array.length);
+    return array[c];
+}
+
+/**
+ * Clamps a number between a minimum and maximum value.
+ * @param value
+ * @param min
+ * @param max
+ * @returns {Number}
+ */
+function clamp(value) {
+    var min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+    var max = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+    if (min != null) {
+        value = Math.max(min, value);
+    }
+
+    if (max != null) {
+        value = Math.min(max, value);
+    }
+
+    return value;
+}
+
+/**
+ * Compares to objects to see if they are equivalent.
+ * @param object1
+ * @param object2
+ * @return {boolean}
+ */
+function dictsEqual(object1, object2) {
+    if ((typeof object1 === "undefined" ? "undefined" : _typeof(object1)) !== (typeof object2 === "undefined" ? "undefined" : _typeof(object2))) {
+        return false;
+    }
+
+    var keys1 = Object.keys(object1),
+        keys2 = Object.keys(object2);
+
+    if (keys1.length !== keys2.length) {
+        return false;
+    }
+
+    for (var i = 0, l = keys1.length; i < l; i++) {
+        var key = keys1[i];
+
+        if (keys2.indexOf(key) === -1) {
+            return false;
+        } else if (object1[key] !== object2[key]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function isEmptyObject(obj) {
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 /***/ })
 /******/ ]);
