@@ -5,83 +5,156 @@
     <title>Title</title>
 
     <style type="text/css">
-        .menu.menubar {
-            display: flex;
-            flex-direction: row;
-            position: static;
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 1rem;
         }
 
-        .menubar > .menuitem {
-            padding: 5px 10px;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .menubar > .menuitem:hover {
-            background-color: #ff0000;
-        }
-
-        .menu {
+        .menubar {
             list-style: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+            border-bottom: 2px solid #000;
+            user-select: none;
+        }
+
+        .menubar .menuitem {
+            position: relative;
+            padding: 4px 10px;
+            line-height: 1.5;
+            cursor: pointer;
+        }
+
+        .menubar .menuitem.active {
+            background-color: #007fff;
+        }
+
+        .menubar .dropdown.active > .menu {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menubar .menu {
+            position: absolute;
+            left: 0;
+            top: 100%;
+
+            list-style: none;
+            display: none;
+
             padding: 0;
             margin: 0;
-            display: none;
-            position: absolute;
+            min-width: 200px;
+            background-color: #ffffff;
+            border: 1px solid #000;
+        }
+
+        .menubar .menu .menu {
+            left: 100%;
+            top: 0;
         }
     </style>
 
     <script type="text/javascript" src="test_menu.bundle.js"></script>
 </head>
 <body>
-    <ul class="menu menubar" id="test-menu">
-        <li class="menuitem">
-            Test #1
+    <ul class="menu menubar toggle" id="test-menu">
+        <li class="dropdown menuitem">
+            <a>Dropdown #1</a>
             <ul class="menu">
-                <li class="menuitem">Test #1</li>
-                <li class="menuitem">Test #2</li>
-                <li class="menuitem">Test #3</li>
-                <li class="menuitem">Test #4</li>
-                <li class="menuitem">Test #5</li>
+                <li class="menuitem"><a href="#">MenuItem #1</a></li>
+                <li class="menuitem"><a href="#">MenuItem #2</a></li>
+                <li class="menuitem"><a href="#">MenuItem #3</a></li>
+                <li class="dropdown menuitem">
+                    <a>DropDown #4</a>
+                    <ul class="menu">
+                        <li class="menuitem"><a>MenuItem #1</a></li>
+                        <li class="menuitem"><a>MenuItem #2</a></li>
+                        <li class="menuitem"><a>MenuItem #3</a></li>
+                        <li class="menuitem"><a>MenuItem #4</a></li>
+                        <li class="menuitem"><a>MenuItem #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem"><a href="#">MenuItem #5</a></li>
             </ul>
         </li>
-        <li class="menuitem">
-            Test #2
+        <li class="dropdown menuitem">
+            <a>Dropdown #1</a>
             <ul class="menu">
-                <li class="menuitem">Test #1</li>
-                <li class="menuitem">Test #2</li>
-                <li class="menuitem">Test #3</li>
-                <li class="menuitem">Test #4</li>
-                <li class="menuitem">Test #5</li>
+                <li class="menuitem"><a href="#">MenuItem #1</a></li>
+                <li class="menuitem"><a href="#">MenuItem #2</a></li>
+                <li class="menuitem"><a href="#">MenuItem #3</a></li>
+                <li class="dropdown menuitem">
+                    <a>DropDown #4</a>
+                    <ul class="menu">
+                        <li class="menuitem"><a>MenuItem #1</a></li>
+                        <li class="menuitem"><a>MenuItem #2</a></li>
+                        <li class="menuitem"><a>MenuItem #3</a></li>
+                        <li class="menuitem"><a>MenuItem #4</a></li>
+                        <li class="menuitem"><a>MenuItem #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem"><a href="#">MenuItem #5</a></li>
             </ul>
         </li>
-        <li class="menuitem">
-            Test #3
+        <li class="dropdown menuitem">
+            <a>Dropdown #1</a>
             <ul class="menu">
-                <li class="menuitem">Test #1</li>
-                <li class="menuitem">Test #2</li>
-                <li class="menuitem">Test #3</li>
-                <li class="menuitem">Test #4</li>
-                <li class="menuitem">Test #5</li>
+                <li class="menuitem"><a href="#">MenuItem #1</a></li>
+                <li class="menuitem"><a href="#">MenuItem #2</a></li>
+                <li class="menuitem"><a href="#">MenuItem #3</a></li>
+                <li class="dropdown menuitem">
+                    <a>DropDown #4</a>
+                    <ul class="menu">
+                        <li class="menuitem"><a>MenuItem #1</a></li>
+                        <li class="menuitem"><a>MenuItem #2</a></li>
+                        <li class="menuitem"><a>MenuItem #3</a></li>
+                        <li class="menuitem"><a>MenuItem #4</a></li>
+                        <li class="menuitem"><a>MenuItem #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem"><a href="#">MenuItem #5</a></li>
             </ul>
         </li>
-        <li class="menuitem">
-            Test #4
+        <li class="dropdown menuitem">
+            <a>Dropdown #1</a>
             <ul class="menu">
-                <li class="menuitem">Test #1</li>
-                <li class="menuitem">Test #2</li>
-                <li class="menuitem">Test #3</li>
-                <li class="menuitem">Test #4</li>
-                <li class="menuitem">Test #5</li>
+                <li class="menuitem"><a href="#">MenuItem #1</a></li>
+                <li class="menuitem"><a href="#">MenuItem #2</a></li>
+                <li class="menuitem"><a href="#">MenuItem #3</a></li>
+                <li class="dropdown menuitem">
+                    <a>DropDown #4</a>
+                    <ul class="menu">
+                        <li class="menuitem"><a>MenuItem #1</a></li>
+                        <li class="menuitem"><a>MenuItem #2</a></li>
+                        <li class="menuitem"><a>MenuItem #3</a></li>
+                        <li class="menuitem"><a>MenuItem #4</a></li>
+                        <li class="menuitem"><a>MenuItem #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem"><a href="#">MenuItem #5</a></li>
             </ul>
         </li>
-        <li class="menuitem">
-            Test #5
+        <li class="dropdown menuitem">
+            <a>Dropdown #1</a>
             <ul class="menu">
-                <li class="menuitem">Test #1</li>
-                <li class="menuitem">Test #2</li>
-                <li class="menuitem">Test #3</li>
-                <li class="menuitem">Test #4</li>
-                <li class="menuitem">Test #5</li>
+                <li class="menuitem"><a href="#">MenuItem #1</a></li>
+                <li class="menuitem"><a href="#">MenuItem #2</a></li>
+                <li class="menuitem"><a href="#">MenuItem #3</a></li>
+                <li class="dropdown menuitem">
+                    <a>DropDown #4</a>
+                    <ul class="menu">
+                        <li class="menuitem"><a>MenuItem #1</a></li>
+                        <li class="menuitem"><a>MenuItem #2</a></li>
+                        <li class="menuitem"><a>MenuItem #3</a></li>
+                        <li class="menuitem"><a>MenuItem #4</a></li>
+                        <li class="menuitem"><a>MenuItem #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem"><a href="#">MenuItem #5</a></li>
             </ul>
         </li>
     </ul>

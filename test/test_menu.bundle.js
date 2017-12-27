@@ -9049,71 +9049,380 @@ var _dom = __webpack_require__(329);
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Menu = exports.Menu = function () {
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Initialization methods
+
+    /**
+     * If true the menu will toggle off when a menu is clicked directly or a disabled item is clicked.
+     * @type {boolean}
+     */
+
+
+    /**
+     * If true the menu will automatically activate if the user mouses over an item, otherwise
+     * the user will need to click an item in order to activate the menu.  This can be set to
+     * positive integer that will cause the menu to activate after the given delay in
+     * milliseconds.
+     * @type {boolean|number}
+     */
     function Menu(selector) {
+        var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
         _classCallCheck(this, Menu);
 
+        this.menuClassName = "menu";
+        this.itemClassName = "menuitem";
+        this.dropDownClassName = "dropdown";
+        this.activeClassName = "active";
+        this.disabledClassName = "disabled";
+        this.multipleClassName = "multiple";
+        this.noAutoActivateClassName = "no-auto-activate";
+        this.toggleClassName = "toggle";
         this.timeout = 1000;
-        this.delay = false;
-        this.autoActivate = true;
-        this.closeOnClick = false;
-        this.closeOnSelect = false;
-        this.multiple = false;
+        this.autoActivate = false;
+        this.toggle = true;
+        this.closeOnClick = true;
+        this.closeOnSelect = true;
 
-        this.view = (0, _dom.resolveSelector)(selector);
+        Object.assign(this, config);
 
-        this.onMouseOver = this.onMouseOver.bind(this);
-        this.onMouseOut = this.onMouseOut.bind(this);
-        this.onClick = this.onClick.bind(this);
-
-        this.view.addEventListener("click", this.onClick);
-        this.view.addEventListener("mouseover", this.onMouseOver);
-        this.view.addEventListener("mouseout", this.onMouseOut);
+        if (selector) {
+            this.setView((0, _dom.resolveSelector)(selector));
+            this.init();
+        }
     }
 
+    /**
+     * Controls if the menu can be toggled off by clicking a root item.
+     * @type {boolean}
+     */
+
+
+    /**
+     * The amount of time after the mouse leaves the menu that it will deactivate.
+     * The value can be a boolean value as well. False means it will never timeout
+     * and true means it will timeout immediately.  Equivalent to a value of 0
+     * milliseconds.
+     * @type {number|boolean}
+     */
+
+
     _createClass(Menu, [{
-        key: "show",
-        value: function show() {}
+        key: "init",
+        value: function init() {
+            this.onClick = this.onClick.bind(this);
+            this.onMouseOver = this.onMouseOver.bind(this);
+            this.onMouseOut = this.onMouseOut.bind(this);
+
+            this.view.addEventListener("click", this.onClick, false);
+            this.view.addEventListener("mouseover", this.onMouseOver, false);
+            this.view.addEventListener("mouseout", this.onMouseOut, false);
+        }
     }, {
-        key: "hide",
-        value: function hide() {}
+        key: "setView",
+        value: function setView(view) {
+            this.view = view;
+        }
+    }, {
+        key: "destroy",
+        value: function destroy() {
+            this.view.removeEventListener("click", this.onClick);
+            this.view.removeEventListener("mouseover", this.onMouseOver);
+            this.view.removeEventListener("mouseout", this.onMouseOut);
+
+            if (this._onDocumentClick) {
+                document.removeEventListener("click", this._onDocumentClick);
+                this._onDocumentClick = null;
+            }
+
+            this.view = null;
+
+            if (this._timer) {
+                clearTimeout(this._timer);
+            }
+        }
+
+        //------------------------------------------------------------------------------------------------------------------
+        // Action methods
+
     }, {
         key: "activate",
-        value: function activate() {}
+        value: function activate(node) {
+            var _this = this;
+
+            if (this.isActive(node)) return;
+
+            var parent = this.getParentNode(node);
+
+            if (parent && !this.isActive(parent)) {
+                this.activate(parent);
+            }
+
+            node.classList.add(this.activeClassName);
+
+            if (parent) {
+                var activeItems = this.getActiveItems(parent);
+
+                if (activeItems.length > 1 && !parent.classList.contains(this.multipleClassName)) {
+                    for (var i = 0, l = activeItems.length; i < l; i++) {
+                        if (activeItems[i] !== node) {
+                            this.deactivate(activeItems[i]);
+                        }
+                    }
+                }
+            }
+
+            if (node === this.view) {
+                this._onDocumentClick = function (event) {
+                    if (!_this.view.contains(event.target) && _this.view !== event.target) {
+                        document.removeEventListener("click", _this._onDocumentClick);
+                        _this._onDocumentClick = null;
+                        _this.deactivate(_this.view);
+                    }
+                };
+
+                document.addEventListener("click", this._onDocumentClick);
+            }
+
+            var activateEvent = new CustomEvent("menu-activate", {
+                detail: {
+                    menu: this
+                }
+            });
+
+            node.dispatchEvent(activateEvent);
+        }
     }, {
         key: "deactivate",
-        value: function deactivate() {}
-    }, {
-        key: "appendTo",
-        value: function appendTo(selector) {
-            var node = (0, _dom.resolveSelector)(selector);
-            node.appendChild(this.view);
+        value: function deactivate(node) {
+            if (!this.isActive(node)) return;
+
+            var selector = "." + this.menuClassName + "." + this.activeClassName + ", ." + this.itemClassName + "." + this.activeClassName;
+            var activeItems = node.querySelectorAll(selector);
+
+            for (var i = 0, l = activeItems.length; i < l; i++) {
+                activeItems[i].classList.remove(this.activeClassName);
+            }
+
+            node.classList.remove(this.activeClassName);
+
+            if (this.isItem(node)) {
+                var parent = this.getParentMenu(node);
+
+                if (this.getActiveItems(parent).length === 0) {
+                    parent.classList.remove(this.activeClassName);
+                }
+            }
+
+            if (this._onDocumentClick && node === this.view) {
+                document.removeEventListener("click", this._onDocumentClick);
+                this._onDocumentClick = null;
+            }
+
+            var deactivateEvent = new CustomEvent("deactivate-activate", {
+                detail: {
+                    menu: this
+                }
+            });
+
+            node.dispatchEvent(deactivateEvent);
         }
+
+        //------------------------------------------------------------------------------------------------------------------
+        // Event methods
+
     }, {
         key: "onClick",
         value: function onClick(event) {
-            console.log("Click");
+            var target = this.getClosestNode(event.target);
+
+            // If the target was an item and closeOnSelect is true, deactivate the entire menu.
+            if (this.closeOnSelect && !this.isDropDown(target)) {
+                this.deactivate(this.view);
+                return;
+            }
+
+            // If the target was an item or dropdown and is wasn't activated, activate it now.
+            if ((this.isItem(target) || this.isDropDown(target)) && !this.isActive(target)) {
+                this.activate(target);
+                return;
+            }
+
+            // If the view is active and the target wasn't an enabled item or dropdown, deactivate the entire menu.
+            if (this.isActive(this.view) && (!(this.isItem(target) || this.isDropDown(target)) || this.isDisabled(target))) {
+                this.deactivate(this.view);
+                return;
+            }
+
+            // If an active item or dropdown was clicked and it is toggleable, deactivate it.
+            if (this.isItem(target) || this.isDropDown(target)) {
+                var parent = this.getParentMenu(target),
+                    toggle = void 0;
+
+                if (parent === this.view) {
+                    toggle = parent.classList.contains(this.toggleClassName) || target.classList.contains(this.toggleClassName);
+                } else {
+                    toggle = parent.classList.contains(this.toggleClassName) || target.classList.contains(this.toggleClassName);
+                }
+
+                if (toggle) {
+                    this.deactivate(target);
+                }
+            }
         }
     }, {
         key: "onMouseOver",
         value: function onMouseOver(event) {
-            console.log("On Mouse Out");
+            var _this2 = this;
+
+            var target = this.getClosestNode(event.target);
+
+            if (this._timer) {
+                clearTimeout(this._timer);
+                this._timer = null;
+            }
+
+            if (this.isItem(target) && !target.classList.contains(this.noAutoActivateClassName)) {
+                var parent = this.getParentMenu(target);
+
+                if (parent !== this.view || this.autoActivate === true || this.isActive(this.view)) {
+                    this.activate(target);
+                } else if (typeof this.autoActivate === "number" && this.autoActivate >= 0) {
+                    this._timer = setTimeout(function () {
+                        _this2._timer = null;
+                        _this2.activate(target);
+                    }, this.autoActivate);
+                }
+            }
         }
     }, {
         key: "onMouseOut",
         value: function onMouseOut(event) {
-            console.log("On Mouse Over.");
+            var _this3 = this;
+
+            if (this._timer) {
+                clearTimeout(this._timer);
+                this._timer = null;
+            }
+
+            var target = this.getClosestNode(event.target);
+
+            if (this.timeout >= 0 && !this.view.contains(event.relatedTarget)) {
+                this._timer = setTimeout(function () {
+                    console.log("Timeout");
+                    _this3._timer = null;
+                    _this3.deactivate(_this3.view);
+                }, this.timeout);
+            }
+
+            if (this.isActive(target) && this.isItem(target) && !this.isDropDown(target)) {
+                this.deactivate(target);
+            }
+        }
+
+        //------------------------------------------------------------------------------------------------------------------
+        // Methods used to transversing the menu.
+
+    }, {
+        key: "getClosestNode",
+        value: function getClosestNode(element) {
+            if (!this.view.contains(element)) return null;
+
+            var selector = "." + this.menuClassName + ", ." + this.itemClassName,
+                target = element.closest(selector);
+
+            return target && this.view.contains(target) ? target : this.view;
         }
     }, {
-        key: "getItems",
-        value: function getItems() {}
+        key: "getClosestItem",
+        value: function getClosestItem(element) {
+            var selector = "." + this.itemClassName,
+                target = element.closest(selector);
+
+            return target && this.view.contains(target) ? target : null;
+        }
+    }, {
+        key: "getClosestMenu",
+        value: function getClosestMenu(element) {
+            var selector = "." + this.menuClassName,
+                target = element.closest(selector);
+
+            return target && this.view.contains(target) ? target : this.view;
+        }
+    }, {
+        key: "getChildren",
+        value: function getChildren(element) {
+            var _this4 = this;
+
+            var items = element.querySelectorAll("." + this.menuClassName + ", ." + this.itemClassName);
+            items = Array.prototype.slice.call(items, 0);
+            items.filter(function (item) {
+                return _this4.getClosestNode(item.parent) === element;
+            });
+            return items;
+        }
+    }, {
+        key: "getParentNode",
+        value: function getParentNode(element) {
+            return this.getClosestNode(element.parentNode);
+        }
+    }, {
+        key: "getParentItem",
+        value: function getParentItem(element) {
+            return this.getClosestItem(element.parentNode);
+        }
+    }, {
+        key: "getParentMenu",
+        value: function getParentMenu(element) {
+            return this.getClosestMenu(element.parentNode);
+        }
+    }, {
+        key: "getActiveItems",
+        value: function getActiveItems(element) {
+            var _this5 = this;
+
+            var children = this.getChildren(element);
+            children = children.filter(function (item) {
+                return _this5.isActive(item);
+            });
+            return children;
+        }
+    }, {
+        key: "isMenu",
+        value: function isMenu(element) {
+            return element.classList.contains(this.menuClassName);
+        }
+    }, {
+        key: "isItem",
+        value: function isItem(element) {
+            return element.classList.contains(this.itemClassName);
+        }
+    }, {
+        key: "isActive",
+        value: function isActive(element) {
+            return element.classList.contains(this.activeClassName);
+        }
+    }, {
+        key: "isDisabled",
+        value: function isDisabled(element) {
+            var d = element.closest("." + this.disabledClassName);
+
+            if (!this.view.contains(d) && d !== this.view) {
+                d = null;
+            }
+
+            return !!d;
+        }
+    }, {
+        key: "isDropDown",
+        value: function isDropDown(element) {
+            return element.classList.contains(this.dropDownClassName);
+        }
     }]);
 
     return Menu;
 }();
-
-var Dropdown = function Dropdown() {
-    _classCallCheck(this, Dropdown);
-};
 
 /***/ }),
 /* 329 */
