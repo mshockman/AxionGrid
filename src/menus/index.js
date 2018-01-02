@@ -15,6 +15,8 @@ export class Menu {
     noAutoActivateClassName = "no-auto-activate";
     toggleClassName = "toggle";
 
+    noAutoActivateSelector = false;
+
     /**
      * The amount of time after the mouse leaves the menu that it will deactivate.
      * The value can be a boolean value as well. False means it will never timeout
@@ -220,7 +222,7 @@ export class Menu {
             this._timer = null;
         }
 
-        if(this.isItem(target) && !target.classList.contains(this.noAutoActivateClassName)) {
+        if(this.isItem(target) && !(target.classList.contains(this.noAutoActivateClassName) || (this.noAutoActivateSelector && target.matches(this.noAutoActivateSelector)))) {
             let parent = this.getParentMenu(target);
 
             if(parent !== this.view || this.autoActivate === true || this.isActive(this.view)) {

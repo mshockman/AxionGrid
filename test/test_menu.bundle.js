@@ -9079,6 +9079,7 @@ var Menu = exports.Menu = function () {
         this.multipleClassName = "multiple";
         this.noAutoActivateClassName = "no-auto-activate";
         this.toggleClassName = "toggle";
+        this.noAutoActivateSelector = false;
         this.timeout = 1000;
         this.autoActivate = false;
         this.toggle = true;
@@ -9283,7 +9284,7 @@ var Menu = exports.Menu = function () {
                 this._timer = null;
             }
 
-            if (this.isItem(target) && !target.classList.contains(this.noAutoActivateClassName)) {
+            if (this.isItem(target) && !(target.classList.contains(this.noAutoActivateClassName) || this.noAutoActivateSelector && target.matches(this.noAutoActivateSelector))) {
                 var parent = this.getParentMenu(target);
 
                 if (parent !== this.view || this.autoActivate === true || this.isActive(this.view)) {
